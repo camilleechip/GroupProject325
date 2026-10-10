@@ -1,10 +1,10 @@
 # GroupProject325
 
-This is for our group project for CSE-325 .net Software Development
-BYU-Idaho - 08 Oct 2026 - Prof Robert Kumar
+This is for our group project for CSE-325 .net Software Development  
+BYU-Idaho - 08 Oct 2026 - Prof Robert Kumar  
 Wednesday Evening Group - "Bolievers" (Believers)
 
-## Github Access URL
+## Github
 
 https://github.com/camilleechip/GroupProject325
 
