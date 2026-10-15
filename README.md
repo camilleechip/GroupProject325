@@ -64,4 +64,10 @@ No live interface for game pieces
 No built chat/dialogue options  
 Catalogue of all possible objects
 
+## File Structure
+
+// How files are organized
+
 ## Views
+
+// What things look like
