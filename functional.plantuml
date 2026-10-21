@@ -1,0 +1,29 @@
+@startuml
+
+start
+
+:GM creates Encounter;
+
+:Encounter grants XP, Gold, and Items;
+
+:Add rewards to Party Ledger;
+
+if (Assign item?) then (Yes)
+
+    :Move Item to User Inventory;
+
+    if (User uses/sells item?) then (Yes)
+        :Remove Item;
+    else (No)
+        :Keep Item;
+    endif
+
+    if (Return to Party?) then (Yes)
+        :Move Item to Party Inventory;
+    endif
+
+endif
+
+stop
+
+@enduml
