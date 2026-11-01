@@ -15,7 +15,8 @@ Drew Breneman,
 Gage D'Orlando,
 Sierra Evans,
 Camille Huggins,
-Harrison Merrill
+Harrison Merrill,
+Drew Breneman
 
 ## License
 
