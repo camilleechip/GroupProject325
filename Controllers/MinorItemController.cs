@@ -5,8 +5,6 @@ using TTL.Models;
 namespace TTL.Controllers;
 
 [Route("minoritems")]
-[ApiController]
-
 public class MinorItemController : Controller
 {
     private readonly TTLContext _db;
@@ -91,22 +89,19 @@ public class MinorItemController : Controller
 
         if (ModelState.IsValid)
         {
-            try
+            var existingItem = await _db.MinorItems.FindAsync(id);
+
+            if (existingItem == null)
             {
-                _db.Update(minorItem);
-                await _db.SaveChangesAsync();
+                return NotFound();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MinorItemExists(minorItem.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            existingItem.ResourceType = minorItem.ResourceType;
+            existingItem.Amount = minorItem.Amount;
+            existingItem.TransactionType = minorItem.TransactionType;
+
+            await _db.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
         return View(minorItem);
@@ -144,10 +139,6 @@ public class MinorItemController : Controller
         }
 
         return RedirectToAction(nameof(Index));
-    }
-    private bool MinorItemExists(int id)
-    {
-        return _db.MinorItems.Any(e => e.Id == id);
     }
 }
 
