@@ -1,0 +1,217 @@
+.campaign-container {
+    max-width: 900px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.header-section {
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 1rem;
+}
+
+.header-section h2 {
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.subtitle {
+    color: #6c757d;
+    margin: 0;
+}
+
+/* Minimal Card */
+.form-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.form-card h3 {
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    font-size: 1.25rem;
+    color: #343a40;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.form-hint {
+    display: block;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #0b5ed7;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.825rem;
+}
+
+/* Alerts */
+.alert {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.alert-info {
+    background-color: #cff4fc;
+    color: #055160;
+    border: 1px solid #b6effb;
+}
+
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+}
+
+/* Campaign Grid & Cards */
+.campaign-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+.campaign-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.campaign-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.campaign-card-header h4 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #212529;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.system-badge {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.campaign-gm {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.campaign-desc {
+    margin: 0.5rem 0 1rem 0;
+    font-size: 0.875rem;
+    color: #6c757d;
+    flex-grow: 1;
+}
+
+.campaign-meta {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f1f3f5;
+    margin-bottom: 0.75rem;
+}
+
+.campaign-card-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+    background: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 6px;
+    color: #6c757d;
+}
+
+.validation-errors {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}

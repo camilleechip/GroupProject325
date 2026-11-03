@@ -1,0 +1,177 @@
+@page "/campaigns"
+@rendermode InteractiveServer
+@inject AppDbContext DbContext
+@inject NavigationManager Navigation
+
+<PageTitle>Campaigns - TTRPG Ledger</PageTitle>
+
+<div class="campaign-container">
+    <div class="header-section">
+        <h2>Campaign Management</h2>
+        <p class="subtitle">Create and manage your TTRPG campaigns, assign the Game Master, and organize your ledger.</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <div class="alert @statusClass" role="alert">
+            @statusMessage
+        </div>
+    }
+
+    <!-- Create Campaign Form -->
+    <div class="card form-card">
+        <h3>Create New Campaign</h3>
+        <EditForm Model="@newCampaign" OnValidSubmit="HandleCreateCampaign" FormName="createCampaignForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="validation-errors" />
+
+            <div class="form-group">
+                <label for="title">Campaign Title *</label>
+                <InputText id="title" class="form-control" @bind-Value="newCampaign.Title" placeholder="e.g. Curse of Strahd, Starfinder Odyssey" />
+            </div>
+
+            <div class="form-group">
+                <label for="gm">Game Master (GM) *</label>
+                <InputText id="gm" class="form-control" @bind-Value="newCampaign.GameMaster" placeholder="e.g. Drew, Troy, Camille" />
+                <small class="form-hint">Per FR-6: Initial campaign creator or designated GM holds campaign administrative role.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="system">TTRPG System</label>
+                <InputText id="system" class="form-control" @bind-Value="newCampaign.System" placeholder="e.g. D&D 5e, Pathfinder 2e, Call of Cthulhu, System-Agnostic" />
+            </div>
+
+            <div class="form-group">
+                <label for="desc">Description</label>
+                <InputTextArea id="desc" class="form-control" rows="3" @bind-Value="newCampaign.Description" placeholder="Short description or campaign notes..." />
+            </div>
+
+            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                @(isSubmitting ? "Creating..." : "Create Campaign")
+            </button>
+        </EditForm>
+    </div>
+
+    <!-- Campaign Listing -->
+    <div class="campaign-list-section">
+        <h3>Active Campaigns (@campaigns.Count)</h3>
+
+        @if (isLoading)
+        {
+            <p><em>Loading campaigns from database...</em></p>
+        }
+        else if (campaigns.Count == 0)
+        {
+            <div class="empty-state">
+                <p>No campaigns found yet. Use the form above to start your first campaign!</p>
+            </div>
+        }
+        else
+        {
+            <div class="campaign-grid">
+                @foreach (var campaign in campaigns)
+                {
+                    <div class="campaign-card">
+                        <div class="campaign-card-header">
+                            <h4>@campaign.Title</h4>
+                            <span class="badge system-badge">@campaign.System</span>
+                        </div>
+                        <p class="campaign-gm"><strong>GM:</strong> @campaign.GameMaster</p>
+                        @if (!string.IsNullOrWhiteSpace(campaign.Description))
+                        {
+                            <p class="campaign-desc">@campaign.Description</p>
+                        }
+                        <div class="campaign-meta">
+                            <small class="text-muted">Created: @campaign.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small>
+                        </div>
+                        <div class="campaign-card-actions">
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteCampaign(campaign.Id)">Delete</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private Campaign newCampaign = new();
+    private List<Campaign> campaigns = new();
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private string statusMessage = string.Empty;
+    private string statusClass = "alert-info";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCampaigns();
+    }
+
+    private async Task LoadCampaigns()
+    {
+        isLoading = true;
+        try
+        {
+            campaigns = await DbContext.Campaigns.OrderByDescending(c => c.CreatedAt).ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error loading campaigns: {ex.Message}";
+            statusClass = "alert-danger";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleCreateCampaign()
+    {
+        isSubmitting = true;
+        statusMessage = string.Empty;
+
+        try
+        {
+            newCampaign.CreatedAt = DateTime.UtcNow;
+            DbContext.Campaigns.Add(newCampaign);
+            await DbContext.SaveChangesAsync();
+
+            statusMessage = $"Campaign \"{newCampaign.Title}\" created successfully!";
+            statusClass = "alert-success";
+
+            // Reset form
+            newCampaign = new Campaign();
+            await LoadCampaigns();
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error creating campaign: {ex.Message}";
+            statusClass = "alert-danger";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task DeleteCampaign(int id)
+    {
+        try
+        {
+            var item = await DbContext.Campaigns.FindAsync(id);
+            if (item != null)
+            {
+                DbContext.Campaigns.Remove(item);
+                await DbContext.SaveChangesAsync();
+                statusMessage = "Campaign removed.";
+                statusClass = "alert-info";
+                await LoadCampaigns();
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error deleting campaign: {ex.Message}";
+            statusClass = "alert-danger";
+        }
+    }
+}

@@ -1,0 +1,6 @@
+# SQLite databases and journal/write-ahead logs
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
