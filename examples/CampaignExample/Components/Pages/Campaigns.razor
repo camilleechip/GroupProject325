@@ -18,39 +18,82 @@
         </div>
     }
 
-    <!-- Create Campaign Form -->
-    <div class="card form-card">
-        <h3>Create New Campaign</h3>
-        <EditForm Model="@newCampaign" OnValidSubmit="HandleCreateCampaign" FormName="createCampaignForm">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="validation-errors" />
-
-            <div class="form-group">
-                <label for="title">Campaign Title *</label>
-                <InputText id="title" class="form-control" @bind-Value="newCampaign.Title" placeholder="e.g. Curse of Strahd, Starfinder Odyssey" />
+    <!-- Edit Campaign Modal / Inline Form (Update CRUD for Title, Description, System) -->
+    @if (editingCampaign != null)
+    {
+        <div class="card form-card edit-card">
+            <div class="edit-header">
+                <h3>Edit Campaign: @editingCampaign.Title</h3>
+                <span class="badge system-badge">GM: @editingCampaign.GameMaster (Locked)</span>
             </div>
+            <p class="form-hint">Editing the 3 modifiable fields: <strong>Title</strong>, <strong>System</strong>, and <strong>Description</strong>. (GM & Created date are preserved; Updated timestamp will refresh).</p>
 
-            <div class="form-group">
-                <label for="gm">Game Master (GM) *</label>
-                <InputText id="gm" class="form-control" @bind-Value="newCampaign.GameMaster" placeholder="e.g. Drew, Troy, Camille" />
-                <small class="form-hint">Per FR-6: Initial campaign creator or designated GM holds campaign administrative role.</small>
-            </div>
+            <EditForm Model="@editingCampaign" OnValidSubmit="HandleUpdateCampaign">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="validation-errors" />
 
-            <div class="form-group">
-                <label for="system">TTRPG System</label>
-                <InputText id="system" class="form-control" @bind-Value="newCampaign.System" placeholder="e.g. D&D 5e, Pathfinder 2e, Call of Cthulhu, System-Agnostic" />
-            </div>
+                <div class="form-group">
+                    <label for="edit-title">Campaign Title *</label>
+                    <InputText id="edit-title" class="form-control" @bind-Value="editingCampaign.Title" />
+                </div>
 
-            <div class="form-group">
-                <label for="desc">Description</label>
-                <InputTextArea id="desc" class="form-control" rows="3" @bind-Value="newCampaign.Description" placeholder="Short description or campaign notes..." />
-            </div>
+                <div class="form-group">
+                    <label for="edit-system">TTRPG System</label>
+                    <InputText id="edit-system" class="form-control" @bind-Value="editingCampaign.System" />
+                </div>
 
-            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
-                @(isSubmitting ? "Creating..." : "Create Campaign")
-            </button>
-        </EditForm>
-    </div>
+                <div class="form-group">
+                    <label for="edit-desc">Description</label>
+                    <InputTextArea id="edit-desc" class="form-control" rows="3" @bind-Value="editingCampaign.Description" />
+                </div>
+
+                <div class="button-row">
+                    <button type="submit" class="btn btn-success" disabled="@isSubmitting">
+                        @(isSubmitting ? "Saving Changes..." : "Save Changes")
+                    </button>
+                    <button type="button" class="btn btn-secondary" @onclick="CancelEdit">
+                        Cancel
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    }
+    else
+    {
+        <!-- Create Campaign Form -->
+        <div class="card form-card">
+            <h3>Create New Campaign</h3>
+            <EditForm Model="@newCampaign" OnValidSubmit="HandleCreateCampaign" FormName="createCampaignForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="validation-errors" />
+
+                <div class="form-group">
+                    <label for="title">Campaign Title *</label>
+                    <InputText id="title" class="form-control" @bind-Value="newCampaign.Title" placeholder="e.g. Curse of Strahd, Starfinder Odyssey" />
+                </div>
+
+                <div class="form-group">
+                    <label for="gm">Game Master (GM) *</label>
+                    <InputText id="gm" class="form-control" @bind-Value="newCampaign.GameMaster" placeholder="e.g. Drew, Troy, Camille" />
+                    <small class="form-hint">Per FR-6: Initial campaign creator or designated GM holds campaign administrative role.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="system">TTRPG System</label>
+                    <InputText id="system" class="form-control" @bind-Value="newCampaign.System" placeholder="e.g. D&D 5e, Pathfinder 2e, Call of Cthulhu, System-Agnostic" />
+                </div>
+
+                <div class="form-group">
+                    <label for="desc">Description</label>
+                    <InputTextArea id="desc" class="form-control" rows="3" @bind-Value="newCampaign.Description" placeholder="Short description or campaign notes..." />
+                </div>
+
+                <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                    @(isSubmitting ? "Creating..." : "Create Campaign")
+                </button>
+            </EditForm>
+        </div>
+    }
 
     <!-- Campaign Listing -->
     <div class="campaign-list-section">
@@ -71,7 +114,7 @@
             <div class="campaign-grid">
                 @foreach (var campaign in campaigns)
                 {
-                    <div class="campaign-card">
+                    <div class="campaign-card @(editingCampaign?.Id == campaign.Id ? "editing-highlight" : "")">
                         <div class="campaign-card-header">
                             <h4>@campaign.Title</h4>
                             <span class="badge system-badge">@campaign.System</span>
@@ -82,10 +125,15 @@
                             <p class="campaign-desc">@campaign.Description</p>
                         }
                         <div class="campaign-meta">
-                            <small class="text-muted">Created: @campaign.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small>
+                            <div><small class="text-muted">Created: @campaign.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small></div>
+                            @if (campaign.UpdatedAt.HasValue)
+                            {
+                                <div><small class="text-muted">Updated: @campaign.UpdatedAt.Value.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small></div>
+                            }
                         </div>
                         <div class="campaign-card-actions">
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteCampaign(campaign.Id)">Delete</button>
+                            <button class="btn btn-sm btn-outline-primary" @onclick="() => StartEdit(campaign)">Edit</button>
+                            <button class="btn btn-sm btn-danger ms-2" @onclick="() => DeleteCampaign(campaign.Id)">Delete</button>
                         </div>
                     </div>
                 }
@@ -96,6 +144,7 @@
 
 @code {
     private Campaign newCampaign = new();
+    private Campaign? editingCampaign;
     private List<Campaign> campaigns = new();
     private bool isLoading = true;
     private bool isSubmitting = false;
@@ -139,13 +188,73 @@
             statusMessage = $"Campaign \"{newCampaign.Title}\" created successfully!";
             statusClass = "alert-success";
 
-            // Reset form
             newCampaign = new Campaign();
             await LoadCampaigns();
         }
         catch (Exception ex)
         {
             statusMessage = $"Error creating campaign: {ex.Message}";
+            statusClass = "alert-danger";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void StartEdit(Campaign campaign)
+    {
+        // Clone for editing to avoid mutating list state directly before save
+        editingCampaign = new Campaign
+        {
+            Id = campaign.Id,
+            Title = campaign.Title,
+            Description = campaign.Description,
+            System = campaign.System,
+            GameMaster = campaign.GameMaster,
+            CreatedAt = campaign.CreatedAt,
+            UpdatedAt = campaign.UpdatedAt
+        };
+        statusMessage = string.Empty;
+    }
+
+    private void CancelEdit()
+    {
+        editingCampaign = null;
+    }
+
+    private async Task HandleUpdateCampaign()
+    {
+        if (editingCampaign == null) return;
+
+        isSubmitting = true;
+        statusMessage = string.Empty;
+
+        try
+        {
+            var existing = await DbContext.Campaigns.FindAsync(editingCampaign.Id);
+            if (existing != null)
+            {
+                // Update the three modifiable fields
+                existing.Title = editingCampaign.Title;
+                existing.Description = editingCampaign.Description;
+                existing.System = editingCampaign.System;
+
+                // Auto-refresh the timestamp
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                await DbContext.SaveChangesAsync();
+
+                statusMessage = $"Campaign \"{existing.Title}\" updated successfully!";
+                statusClass = "alert-success";
+
+                editingCampaign = null;
+                await LoadCampaigns();
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error updating campaign: {ex.Message}";
             statusClass = "alert-danger";
         }
         finally
@@ -165,6 +274,12 @@
                 await DbContext.SaveChangesAsync();
                 statusMessage = "Campaign removed.";
                 statusClass = "alert-info";
+
+                if (editingCampaign?.Id == id)
+                {
+                    editingCampaign = null;
+                }
+
                 await LoadCampaigns();
             }
         }

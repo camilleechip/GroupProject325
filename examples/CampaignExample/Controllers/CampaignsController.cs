@@ -51,6 +51,33 @@ public class CampaignsController : ControllerBase
         return CreatedAtAction(nameof(GetCampaign), new { id = campaign.Id }, campaign);
     }
 
+    // PUT: api/campaigns/5
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateCampaign(int id, Campaign campaign)
+    {
+        if (id != campaign.Id)
+        {
+            return BadRequest("Campaign ID mismatch.");
+        }
+
+        var existing = await _context.Campaigns.FindAsync(id);
+        if (existing == null)
+        {
+            return NotFound();
+        }
+
+        // Update the 3 editable properties
+        existing.Title = campaign.Title;
+        existing.Description = campaign.Description;
+        existing.System = campaign.System;
+
+        // Auto-update timestamp
+        existing.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
     // DELETE: api/campaigns/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCampaign(int id)
