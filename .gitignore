@@ -351,3 +351,5 @@ MigrationBackup/
 
 # Library folder
 lib/
+
+ledger.db
