@@ -95,6 +95,6 @@ Numbered, testable, written in MUST / SHOULD / MAY (RFC 2119) form.
 - **Accessibility** — WCAG 2.1 AA conformance for all UI added.
 - **Responsive** — Mobile first web design with CLS within industry standards.
 - **Scalability** — Easily handles groups between 1-12 users.
-- **Reliability** — Maintains constant uptime while not under server maintanance. Users can access data within two minutes of server cold-start.
+- **Reliability** — Maintains constant uptime while not under server maintenance. Users can access data within two minutes of server cold-start.
 - **Maintainability** — Follows .NET Blazor standards and practices.
 - **Internationalization** — Supports english, spanish, japanese, thai, korean, tagalog, and cantonese.
