@@ -1,50 +1,173 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GroupProject325</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GroupProject325.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GroupProject325</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - GroupProject325 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+<head>
+	<!-- META DATA -->
+	<meta charset="utf-8" />
+	<meta name="description" content="Tabletop Ledger - Blazor Web App">
+	<meta name="author"
+				content="Troy Bowman, Drew Breneman, Gage D'Orlando, Sierra Evans, Camille Huggins, & Harrison Merrill">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="theme-color" content="#005633">
+	<meta name="color-scheme" content="light dark">
+	<meta name="robots" content="noimageindex">
+
+
+	<title>@ViewData["Title"] - GroupProject325</title>
+
+	<!-- Logos and Favicons -->
+	<!-- Insert here once favicons are built -->
+
+	<!-- Open Graph Metadata -->
+	<meta property="og:title" content="@ViewData["Title"]">
+
+	<!-- Stylesheets -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet"
+				href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Trade+Winds&family=Cinzel+Decorative:wght@400;700;900&display=swap">
+	@* <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> *@
+	<link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/GroupProject325.styles.css" asp-append-version="true" />
+
+	<!-- Scripts -->
+	<script type="importmap"></script>
+</head>
+
+<body>
+	<!-- SVG HERE -->
+	<svg xmlns="http://www.w3.org/2000/svg" style="display:none;" aria-hidden="true">
+		<!-- Home -->
+		<symbol id="icon-home" viewBox="0 0 24 24">
+			<path d="M3 11l9-8 9 8" />
+			<path d="M5 12v9h5v-6h4v6h5v-9" />
+		</symbol>
+
+		<!-- Document (assignments) -->
+		<symbol id="icon-file-text" viewBox="0 0 24 24">
+			<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+			<path d="M14 2v6h6" />
+			<path d="M8 13h8" />
+			<path d="M8 17h5" />
+		</symbol>
+
+		<!-- Mickey Mouse ears (teaching demos) -->
+		<symbol id="icon-mickey" viewBox="0 0 24 24">
+			<circle cx="8" cy="8" r="4" />
+			<circle cx="16" cy="8" r="4" />
+			<circle cx="12" cy="14" r="6" />
+		</symbol>
+
+		<!-- Mail -->
+		<symbol id="icon-mail" viewBox="0 0 24 24">
+			<rect x="3" y="5" width="18" height="14" rx="2" />
+			<path d="M3 7l9 6 9-6" />
+		</symbol>
+
+		<!-- GitHub -->
+		<symbol id="icon-github" viewBox="0 0 24 24">
+			<path d="M12 2a10 10 0 0 0-3.16 19.49
+			c.5.09.68-.22.68-.48v-1.7
+			c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.12-1.47-1.12-1.47-.92-.63.07-.62.07-.62 1.02.07 1.55 1.06 1.55 1.06.9 1.54 2.37 1.1 2.95.84a2.2 2.2 0 0 1 .66-1.38
+			c-2.22-.25-4.56-1.11-4.56-4.94a3.86 3.86 0 0 1 1.03-2.68 3.6 3.6 0 0 1 .1-2.65s.84-.27 2.75 1.02
+			a9.4 9.4 0 0 1 5 0c1.9-1.29 2.74-1.02 2.74-1.02a3.6 3.6 0 0 1 .1 2.65 3.86 3.86 0 0 1 1.03 2.68c0 3.84-2.34 4.69-4.57 4.94a2.4 2.4 0 0 1 .69 1.86v2.76c0 .27.18.58.69.48
+			A10 10 0 0 0 12 2z" />
+		</symbol>
+
+		<!-- Arrow Up (return-to-top) -->
+		<symbol id="icon-arrow-up" viewBox="0 0 24 24">
+			<path d="M12 19V5" />
+			<path d="M5 12l7-7 7 7" />
+		</symbol>
+	</svg>
+
+	
+	<header class="clearfix">
+		<figure class="logo">
+			@* <a href="/">
+				<img src="*">
+			</a>
+			NOTE: Logo goes here once created and finalized *@
+		</figure>
+
+		<div class="slogan">
+			<h1>Tabletop Ledger 325</h1>
+			<h2>Your Game - Your Rules</h2>
+		</div>
+
+		<div class="skip-to-content"><a href="#maincontent">skip to main content</a></div>
+
+		<details class="theme-menu"> <!-- Theme toggle to allow users to manually switch between light-dark -->
+			<summary class="theme-control">
+				<span class="visually-hidden">Color scheme</span>
+			</summary>
+			<div class="theme-extra" role="group" aria-label="Choose color scheme">
+				<label class="theme-control theme-pick" data-theme-pick="light">
+					<input name="theme-preference" type="radio" value="light">
+					<span aria-hidden="true">&#9788;&#65039;</span>
+					<span class="visually-hidden">Light</span>
+				</label>
+				<label class="theme-control theme-pick" data-theme-pick="system">
+					<input name="theme-preference" type="radio" value="system" checked>
+					<span aria-hidden="true">&#9881;&#65039;</span>
+					<span class="visually-hidden">System default</span>
+				</label>
+				<label class="theme-control theme-pick" data-theme-pick="dark">
+					<input name="theme-preference" type="radio" value="dark">
+					<span aria-hidden="true">&#127766;</span>
+					<span class="visually-hidden">Dark</span>
+				</label>
+			</div>
+		</details>
+
+		<div class="burger-menu">
+			<button onclick="toggleMenu()">&#8801;</button>
+		</div>
+
+		@* <!--old: <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">-->  *@
+		<nav class="site-nav">
+			<div class="container-fluid">
+				<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GroupProject325</a>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+								aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+					<ul class="navbar-nav flex-grow-1">
+						<li class="nav-item">
+							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">Login</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+	<div class="container">
+		<main id="maincontent" role="main">
+			@RenderBody()
+		</main>
+	</div>
+
+	<footer class="border-top footer text-muted">
+		<div class="container">
+			&copy; 2026 - GroupProject325 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+			<a href="https://github.com/camilleechip/GroupProject325/" aria-label="GitHub Profile">
+				<svg class="icon" aria-hidden="true">
+					<use href="#icon-github"></use>
+				</svg>
+			</a>
+		</div>
+	</footer>
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	@await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>

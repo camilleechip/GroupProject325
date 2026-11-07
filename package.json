@@ -1,0 +1,16 @@
+{
+	"name": "groupproject325",
+	"private": true,
+	"version": "1.0.0",
+	"description": "This is for our group project for CSE-325 .net Software Development ",
+	"scripts": {
+		"css:build": "lightningcss --bundle --minify --targets \">= 0.25%\" wwwroot/css/src/main.css -o wwwroot/css/styles.css"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@11.24.0",
+	"devDependencies": {
+		"lightningcss-cli": "^1.32.0"
+	}
+}
