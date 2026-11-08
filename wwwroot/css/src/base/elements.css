@@ -1,0 +1,136 @@
+/* Base element styles: body, headings, links, lists.
+   No classes here, only bare HTML element selectors.
+   Reference tokens with var(). */
+
+:root {
+	interpolate-size: allow-keywords;
+	accent-color: var(--color-accent);
+}
+
+/* Content */
+body {
+	font-family: var(--font-family-sans);
+	font-size: var(--font-size-body);
+	line-height: var(--line-height);
+	color: var(--color-text);
+	background-color: var(--color-bg);
+}
+
+p {
+	padding: var(--spacing-sm);
+}
+
+strong {
+	font-weight: bold;
+	font-size: 1.25em;
+	font-style: oblique;
+}
+
+img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin-inline: auto;
+}
+
+/* Headings */
+h1 {
+	font-size: var(--font-size-display);
+	/* text-shadow: var(--shadow-lg); */
+}
+
+h2 {
+	font-size: var(--font-size-heading-lg);
+	/* text-shadow: var(--shadow-md); */
+}
+
+:where(h1, h2) {
+	position: relative;
+	margin-top: var(--spacing-sm);
+	margin-bottom: var(--spacing-sm);
+	padding-block: var(--spacing-xs);
+	font-family: var(--font-family-head);
+	text-shadow: var(--shadow-heading);
+	color: var(--color-primary);
+	text-wrap: balance;
+}
+
+:where(h3, h4, h5, h6) {
+	font-family: var(--font-family-serif);
+	line-height: var(--line-height);
+	color: var(--color-primary);
+	text-shadow: var(--shadow-heading);
+	text-wrap: balance;
+}
+
+/* Navigation */
+nav {
+	font-family: var(--font-family-serif);
+	text-decoration: none;
+	font-size: var(--font-size-lg);
+}
+
+/* Links */
+a {
+	color: var(--color-link);
+	&:hover {
+		color: var(--color-link-hover);
+	}
+}
+
+a[href$=".pdf"] {
+	color: var(--color-link-pdf);
+	&:hover {
+		color: var(--color-link-pdf-hover);
+	}
+}
+
+/* Attribute Selectors */
+[disabled] {
+	cursor: not-allowed;
+	opacity: var(--opacity-disabled);
+}
+
+[lang|="en"] {
+	quotes: "“" "”" "‘" "’";
+}
+
+[lang="fr"] {
+	quotes: "« " " »" "‹ " " ›";
+}
+
+[lang="ja"] {
+	quotes: "「" "」" "『" "』";
+}
+
+/* Blocks */
+pre code {
+	display: block;
+	padding: 1em;
+	background: var(--color-surface);
+	border-radius: 0.5rem;
+	white-space: pre;
+	overflow-x: auto;
+	font-family: var(--font-family-mono);
+	font-size: 0.9em;
+	tab-size: 2;
+	-moz-tab-size: 2;
+}
+
+textarea {
+	field-sizing: content;
+	min-height: 3lh;
+	max-height: 10lh;
+}
+
+/* Accessibility Rules */
+.skip-to-content a {
+	position: absolute;
+	top: -40px;
+	background-color: var(--secondary-color);
+	color: var(--text-light);
+}
+
+.skip-to-content a:focus {
+	top: 0;
+}
