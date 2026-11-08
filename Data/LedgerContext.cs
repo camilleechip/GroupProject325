@@ -11,6 +11,7 @@ public class LedgerContext : DbContext
     public DbSet<CustomProperty> CustomProperties => Set<CustomProperty>();
     public DbSet<PropertyOption> PropertyOptions => Set<PropertyOption>();
     public DbSet<ItemPropertyValue> ItemPropertyValues => Set<ItemPropertyValue>();
+    public DbSet<Campaign> Campaigns => Set<Campaign>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
