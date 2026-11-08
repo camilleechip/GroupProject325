@@ -8,6 +8,7 @@ public class LedgerContext : DbContext
     public LedgerContext(DbContextOptions<LedgerContext> options) : base(options) {}
 
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<MinorItem> MinorItem => Set<MinorItem>();
     public DbSet<CustomProperty> CustomProperties => Set<CustomProperty>();
     public DbSet<PropertyOption> PropertyOptions => Set<PropertyOption>();
     public DbSet<ItemPropertyValue> ItemPropertyValues => Set<ItemPropertyValue>();
