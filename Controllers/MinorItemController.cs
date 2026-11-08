@@ -1,36 +1,37 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TTL.Models;
+using GroupProject325.Models;
+using GroupProject325.Data;
 
-namespace TTL.Controllers;
+namespace GroupProject325.Controllers;
 
 [Route("minoritems")]
 public class MinorItemController : Controller
 {
-    private readonly TTLContext _db;
+    private readonly LedgerContext _context;
 
-    public MinorItemController(TTLContext db)
+    public MinorItemController(LedgerContext context)
     {
-        _db = db;
+        _context = context;
     }
 
     // GET: MinorItems
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        return View(await _db.MinorItems.ToListAsync());
+        return View(await _context.MinorItem.ToListAsync());
     }
 
     // GET: MinorItems/Details
     [HttpGet]
     public async Task<IActionResult> Details(int? id)
     {
-        if (id == null || _db.MinorItems == null)
+        if (id == null || _context.MinorItem == null)
         {
             return NotFound();
         }
 
-        var minorItem = await _db.MinorItems
+        var minorItem = await _context.MinorItem
             .FirstOrDefaultAsync(m => m.Id == id);
         if (minorItem == null)
         {
@@ -53,8 +54,8 @@ public class MinorItemController : Controller
     {
         if (ModelState.IsValid)
         {
-            _db.Add(minorItem);
-            await _db.SaveChangesAsync();
+            _context.MinorItem.Add(minorItem);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
         return View(minorItem);
@@ -64,12 +65,12 @@ public class MinorItemController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int? id)
     {
-        if (id == null || _db.MinorItems == null)
+        if (id == null || _context.MinorItem == null)
         {
             return NotFound();
         }
 
-        var minorItem = await _db.MinorItems.FindAsync(id);
+        var minorItem = await _context.MinorItem.FindAsync(id);
         if (minorItem == null)
         {
             return NotFound();
@@ -89,7 +90,7 @@ public class MinorItemController : Controller
 
         if (ModelState.IsValid)
         {
-            var existingItem = await _db.MinorItems.FindAsync(id);
+            var existingItem = await _context.MinorItem.FindAsync(id);
 
             if (existingItem == null)
             {
@@ -97,10 +98,10 @@ public class MinorItemController : Controller
             }
 
             existingItem.ResourceType = minorItem.ResourceType;
-            existingItem.Amount = minorItem.Amount;
+            existingItem.Quantity = minorItem.Quantity;
             existingItem.TransactionType = minorItem.TransactionType;
 
-            await _db.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
@@ -110,12 +111,12 @@ public class MinorItemController : Controller
     // GET: MinorItems/Delete
     public async Task<IActionResult> Delete(int? id)
     {
-        if (id == null || _db.MinorItems == null)
+        if (id == null || _context.MinorItem == null)
         {
             return NotFound();
         }
 
-        var minorItem = await _db.MinorItems
+        var minorItem = await _context.MinorItem
             .FirstOrDefaultAsync(m => m.Id == id);
         if (minorItem == null)
         {
@@ -130,12 +131,12 @@ public class MinorItemController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)    
     {
-        var minorItem = await _db.MinorItems.FindAsync(id);
+        var minorItem = await _context.MinorItem.FindAsync(id);
 
         if (minorItem != null)
         {
-            _db.MinorItems.Remove(minorItem);
-            await _db.SaveChangesAsync();
+            _context.MinorItem.Remove(minorItem);
+            await _context.SaveChangesAsync();
         }
 
         return RedirectToAction(nameof(Index));
