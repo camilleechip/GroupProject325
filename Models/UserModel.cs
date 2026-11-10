@@ -16,6 +16,14 @@ public class User
     [Required, EmailAddress, StringLength(254)]
     public string Email { get; set; } = string.Empty;
 
+    // Which provider issued the identity, e.g. "Google".
+    [Required, StringLength(50)]
+    public string OAuthProvider { get; set; } = string.Empty;
+
+    // The provider's stable ID for this person (the "sub" claim). It never changes.
+    [Required, StringLength(255)]
+    public string OAuthSubject { get; set; } = string.Empty;
+
     public PartyRole Role { get; set; } = PartyRole.Member;
 
     // The ID of the party the user belongs to. It is null until the user joins a party.
@@ -24,8 +32,9 @@ public class User
 
     // The party the user belongs to, so code can write user.Party.Name. 
     // It is null until the user joins a party. Many users can share one party.
-    public Party? Party { get; set; }
-    
+    // COMMENTING THIS OUT UNTIL PARTY IS DEFINED
+    // public Party? Party { get; set; }
+
     // This user's personal inventory of items. Each user has one, and it is 
     // created and deleted together with the user. 
     // It is null only on a User object that was loaded without its inventory.
@@ -33,5 +42,6 @@ public class User
 
     // The encounters this user has created (only a GM has that permission). 
     // It starts as an empty list anmd is never null.
-    public List<Encounter> Encounters { get; set; } = new();
+    // COMMENTING THIS OUT UNTIL ENCOUNTER IS DEFINED
+    // public List<Encounter> Encounters { get; set; } = new();
 }
