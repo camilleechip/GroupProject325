@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using GroupProject325.Data;
 using GroupProject325.Models;
 
@@ -15,9 +17,9 @@ namespace GroupProject325.Controllers
     [Authorize]
     public class UsersController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly LedgerContext _context;
 
-        public UsersController(AppDbContext context)
+        public UsersController(LedgerContext context)
         {
             _context = context;
         }
@@ -92,21 +94,27 @@ namespace GroupProject325.Controllers
         public async Task<IActionResult> Create([Bind("UserName")] User user)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrWhiteSpace(email))
+            var (provider, subject) = GetOAuthIdentity();
+            if (string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(provider) ||
+                string.IsNullOrWhiteSpace(subject))
             {
                 return Unauthorized();
             }
 
-            // If they are already registered, go to their existing account instead of making a 
-            // duplicate.
-            var existing = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            // Go to the existing account instead of making a duplicate if already registered.
+            var existing = await GetCurrentUserAsync();
             if (existing != null)
             {
                 return RedirectToAction(nameof(Details), new { id = existing.Id });
             }
 
             user.Email = email;
-            ModelState.Remove("Email"); // Email was not on the form, it was set above.
+            user.OAuthProvider = provider;
+            user.OAuthSubject = subject;
+            ModelState.Remove("Email");
+            ModelState.Remove("OAuthProvider");
+            ModelState.Remove("OAuthSubject");
 
             if (ModelState.IsValid)
             {
@@ -164,6 +172,8 @@ namespace GroupProject325.Controllers
             }
 
             ModelState.Remove("Email"); // Email is not editable, so it is not on the form.
+            ModelState.Remove("OAuthProvider");
+            ModelState.Remove("OAuthSubject");
 
             if (ModelState.IsValid)
             {
@@ -185,6 +195,9 @@ namespace GroupProject325.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            user.Email = current.Email;
+            user.Role = current.Role;
+            user.PartyId = current.PartyId;
             return View(user);
         }
 
@@ -208,6 +221,16 @@ namespace GroupProject325.Controllers
             if (target.PartyId != current.PartyId)
             {
                 return Forbid();
+            }
+            if (!Enum.IsDefined(typeof(PartyRole), role))
+            {
+                return BadRequest();
+            }
+
+            // Don't let the GM demote themselves and leave the party with no GM.
+            if (target.Id == current.Id && role != PartyRole.GM)
+            {
+                return BadRequest();
             }
 
             target.Role = role;
@@ -254,6 +277,7 @@ namespace GroupProject325.Controllers
 
             _context.Users.Remove(current);
             await _context.SaveChangesAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
 
@@ -262,15 +286,23 @@ namespace GroupProject325.Controllers
             return _context.Users.Any(e => e.Id == id);
         }
 
+        // Reads the provider name and provider user ID from the signed-in OAuth identity.
+        private (string? Provider, string? Subject) GetOAuthIdentity()
+        {
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+            return (claim?.Issuer, claim?.Value);
+        }
+
         // Finds the User row that matches the signed-in OAuth identity.
         private async Task<User?> GetCurrentUserAsync()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrWhiteSpace(email))
+            var (provider, subject) = GetOAuthIdentity();
+            if (string.IsNullOrWhiteSpace(provider) || string.IsNullOrWhiteSpace(subject))
             {
                 return null;
             }
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(u =>
+                u.OAuthProvider == provider && u.OAuthSubject == subject);
         }
     }
 }
