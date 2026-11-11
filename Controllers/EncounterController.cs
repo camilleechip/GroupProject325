@@ -162,4 +162,57 @@ public class EncounterController : Controller
         // Go back to the Details page to see the updated encounter
         return RedirectToAction("Details", new { id });
     }
+
+    // POST: /Encounter/AddItem
+    // Adds a reward item like a sword or potions to an encounter.
+    // The form for this sits on the encounter's Details page.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddItem(Guid encounterId, [Bind("Name,Description,Value,Weight,Quantity")] Item item)
+    {
+        // TODO: permission check, only the GM can add items to encounters
+
+        // Find the encounter, and load its current items too
+        var encounter = await _context.Encounters
+            .Include(e => e.Items)
+            .FirstOrDefaultAsync(e => e.Id == encounterId);
+
+        // If no encounter has that id, show a 404 not found page
+        if (encounter == null) return NotFound();
+
+        // Items can't be added after the rewards were given out,
+        // because the campaign already received this encounter's items
+        if (encounter.RewardsApplied) return Locked(encounterId);
+
+        // Check the item's rules from Item.cs (name required, no negative value, etc.)
+        // If something is wrong, go back to Details and show an error message
+        if (!ModelState.IsValid)
+        {
+            TempData["Error"] = "That item has invalid values. Check the name, value, weight, and quantity.";
+            return RedirectToAction("Details", new { id = encounterId });
+        }
+
+        // Attach the new item to this encounter
+        // EF Core will save the item and set its hidden EncounterId for us
+        encounter.Items.Add(item);
+
+        // Record when the encounter was last changed
+        encounter.UpdatedAt = DateTime.UtcNow;
+
+        // Save the new item (nothing is saved until this runs)
+        await _context.SaveChangesAsync();
+
+        // Go back to the Details page so the GM sees the item in the list
+        return RedirectToAction("Details", new { id = encounterId });
+    }
+
+    // Shows an error when someone tries to change an encounter whose rewards
+    // were already given out, then sends them back to the Details page.
+    // It's private because it's a helper, not a page anyone can visit.
+    private IActionResult Locked(Guid id)
+    {
+        // TempData keeps the message through the redirect so the page can show it
+        TempData["Error"] = "This encounter's rewards were already given out, so it can't be changed.";
+        return RedirectToAction("Details", new { id });
+    }
 }
