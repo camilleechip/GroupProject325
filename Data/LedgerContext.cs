@@ -17,8 +17,7 @@ public class LedgerContext : DbContext
     // COMMENTING THIS OUT UNTIL PARTY IS DEFINED
     // public DbSet<Party> Parties => Set<Party>();
     public DbSet<UserInventory> UserInventories => Set<UserInventory>();
-    // COMMENTING THIS OUT UNTIL ENCOUNTER IS DEFINED
-    // public DbSet<Encounter> Encounters => Set<Encounter>();
+    public DbSet<Encounter> Encounters => Set<Encounter>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,5 +40,23 @@ public class LedgerContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        // Encounter 1 -> Item
+        // Item has no EncounterId property, so EF Core makes a hidden EncounterId column on Items.
+        // If an encounter is deleted, its items stay but lose the link.
+        modelBuilder.Entity<Encounter>()
+            .HasMany(e => e.Items)
+            .WithOne()
+            .HasForeignKey("EncounterId")
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // User 1 -> Encounter (the GM who created it)
+        // Tells EF Core to use CreatedByUserId instead of guessing a column called UserId.
+        // A user who created encounters can't be deleted, which protects the ledger history.
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Encounters)
+            .WithOne()
+            .HasForeignKey(e => e.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

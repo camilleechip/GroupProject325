@@ -32,7 +32,6 @@ public class User
 
     // The party the user belongs to, so code can write user.Party.Name. 
     // It is null until the user joins a party. Many users can share one party.
-    // COMMENTING THIS OUT UNTIL PARTY IS DEFINED
     // public Party? Party { get; set; }
 
     // This user's personal inventory of items. Each user has one, and it is 
@@ -41,7 +40,6 @@ public class User
     public UserInventory? Inventory { get; set; }
 
     // The encounters this user has created (only a GM has that permission). 
-    // It starts as an empty list anmd is never null.
-    // COMMENTING THIS OUT UNTIL ENCOUNTER IS DEFINED
-    // public List<Encounter> Encounters { get; set; } = new();
+    // It starts as an empty list and is never null.
+    public List<Encounter> Encounters { get; set; } = new();
 }
