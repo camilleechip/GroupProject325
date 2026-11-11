@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GroupProject325.Controllers;
 
-// Handles creating encounters and giving their rewards to the party
+// Handles creating encounters and giving their rewards to the campaign
 // The GM makes an encounter, adds items to it, then applies it.
 // Once applied, the encounter is locked so rewards can't be given twice.
 public class EncounterController : Controller
@@ -24,7 +24,7 @@ public class EncounterController : Controller
     // Shows a list of all the encounters
     public async Task<IActionResult> Index()
     {
-        // TODO: permission check, only show encounters for the user's party
+        // TODO: permission check, only show encounters for the user's campaign
         // Get every encounter, newest first
         var encounters = await _context.Encounters
             // Sort by the date it was made, newest at the top
@@ -34,12 +34,11 @@ public class EncounterController : Controller
         // Send the list to the Index page to show it
         return View(encounters);
     }
-
     // GET: /Encounter/Details/{id}
     // Shows one encounter and the items it gives out
     public async Task<IActionResult> Details(Guid id)
     {
-        // TODO: permission check, make sure the user is in this encounter's party
+        // TODO: permission check, make sure the user is in this encounter's campaign
 
         // Find the encounter with this id
         var encounter = await _context.Encounters
@@ -70,11 +69,11 @@ public class EncounterController : Controller
     // Runs when the GM submits the Create form
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Title,Description,GoldReward,XpReward,PartyId")] Encounter encounter)
+    public async Task<IActionResult> Create([Bind("Title,Description,GoldReward,XpReward,CampaignId")] Encounter encounter)
     {
         // TODO: permission check, only the GM can create encounters
-        // TODO: once login works, set PartyId and CreatedByUserId from the
-        // logged in user instead of the form, and remove PartyId from [Bind]
+        // TODO: once login works, set CampaignId and CreatedByUserId from the
+        // logged in user instead of the form, and remove CampaignId from [Bind]
 
         // Check the rules on the model ([Required], [Range], etc.)
         // If something is wrong, show the form again with the error messages
