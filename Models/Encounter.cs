@@ -57,4 +57,6 @@ public class Encounter
     // When the encounter was created and when it was last changed.
     // The current time in UTC one standard time zone for everyone.
     // Same names as Item uses, so it matches.
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
