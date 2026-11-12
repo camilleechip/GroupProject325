@@ -58,4 +58,11 @@ public class Campaign
     /// Examples: 2026-11-03T10:15:30Z, null
     /// </summary>
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// What Members of this campaign are allowed to do. Set by the GM.
+    /// </summary>
+    public CampaignPermission MemberPermissions { get; set; } = CampaignPermission.None;
+
+    public List<CampaignMember> Members { get; set; } = new();
 }
