@@ -12,6 +12,7 @@ public class LedgerContext : DbContext
     public DbSet<CustomProperty> CustomProperties => Set<CustomProperty>();
     public DbSet<PropertyOption> PropertyOptions => Set<PropertyOption>();
     public DbSet<ItemPropertyValue> ItemPropertyValues => Set<ItemPropertyValue>();
+    public DbSet<Campaign> Campaigns => Set<Campaign>();
 
     public DbSet<User> Users => Set<User>();
     // COMMENTING THIS OUT UNTIL PARTY IS DEFINED

@@ -1,17 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CampaignExample.Data;
-using CampaignExample.Models;
+using GroupProject325.Data;
+using GroupProject325.Models;
 
-namespace CampaignExample.Controllers;
+namespace GroupProject325.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class CampaignsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly LedgerContext _context;
 
-    public CampaignsController(AppDbContext context)
+    public CampaignsController(LedgerContext context)
     {
         _context = context;
     }
