@@ -25,7 +25,7 @@ namespace GroupProject325.Controllers
         }
 
         // GET: Users
-        // Lists the members of the signed-in user's party, with an optional name search.
+        // Lists users who share a campaign with the signed-in user, with an optional name search.
         public async Task<IActionResult> Index(string searchString)
         {
             var current = await GetCurrentUserAsync();
@@ -35,14 +35,12 @@ namespace GroupProject325.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
-            // A user who has not joined a party has no one to list.
-            if (current.PartyId == null)
-            {
-                return View(new List<User>());
-            }
+            var campaignIds = _context.CampaignMembers
+                .Where(m => m.UserId == current.Id)
+                .Select(m => m.CampaignId);
 
             var users = from u in _context.Users
-                        where u.PartyId == current.PartyId
+                        where u.Memberships.Any(m => campaignIds.Contains(m.CampaignId))
                         select u;
 
             if (!string.IsNullOrEmpty(searchString))
@@ -54,7 +52,7 @@ namespace GroupProject325.Controllers
         }
 
         // GET: Users/Details/Id
-        // A user can view themselves and anyone in their own party.
+        // A user can view themselves and anyone who shares a campaign with them.
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -70,8 +68,11 @@ namespace GroupProject325.Controllers
             }
 
             var current = await GetCurrentUserAsync();
-            if (current == null || (current.Id != user.Id &&
-                (current.PartyId == null || current.PartyId != user.PartyId)))
+            if (current == null)
+            {
+                return Forbid();
+            }
+            if (current.Id != user.Id && !await SharesCampaignAsync(current.Id, user.Id))
             {
                 return Forbid();
             }
@@ -87,8 +88,8 @@ namespace GroupProject325.Controllers
         }
 
         // POST: Users/Create
-        // Only UserName is bound from the form. Email comes from the OAuth claim, and
-        // Role and PartyId are never taken from the form, to protect from overposting.
+        // Only UserName is bound from the form, to protect from overposting.
+        // Email comes from the OAuth claim.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserName")] User user)
@@ -119,7 +120,6 @@ namespace GroupProject325.Controllers
             if (ModelState.IsValid)
             {
                 user.UserName = user.UserName.Trim();
-                user.Role = PartyRole.Member;          // GM is assigned when a party is created.
                 user.Inventory = new UserInventory();  // Every user has exactly one inventory.
 
                 _context.Add(user);
@@ -153,7 +153,7 @@ namespace GroupProject325.Controllers
         }
 
         // POST: Users/Edit/Id
-        // Only Id and UserName are bound, so Email, Role, and PartyId cannot be changed here.
+        // Only Id and UserName are bound, so Email cannot be changed here.
         // The existing row is loaded and updated instead of calling Update(user), because
         // Update would overwrite the unbound columns with empty values.
         [HttpPost]
@@ -196,46 +196,47 @@ namespace GroupProject325.Controllers
                 return RedirectToAction(nameof(Index));
             }
             user.Email = current.Email;
-            user.Role = current.Role;
-            user.PartyId = current.PartyId;
             return View(user);
         }
 
         // POST: Users/ChangeRole/Id
-        // Only the GM of a party can change the role of a member of that same party.
+        // Only the GM of a campaign can change the role of a member of that campaign.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangeRole(Guid id, PartyRole role)
+        public async Task<IActionResult> ChangeRole(Guid id, int campaignId, CampaignRole role)
         {
             var current = await GetCurrentUserAsync();
-            if (current == null || current.Role != PartyRole.GM || current.PartyId == null)
+            if (current == null)
             {
                 return Forbid();
             }
 
-            var target = await _context.Users.FindAsync(id);
+            var isGm = await _context.CampaignMembers.AnyAsync(m =>
+                m.CampaignId == campaignId && m.UserId == current.Id && m.Role == CampaignRole.GM);
+            if (!isGm)
+            {
+                return Forbid();
+            }
+
+            var target = await _context.CampaignMembers.FindAsync(id, campaignId);
             if (target == null)
             {
                 return NotFound();
             }
-            if (target.PartyId != current.PartyId)
-            {
-                return Forbid();
-            }
-            if (!Enum.IsDefined(typeof(PartyRole), role))
+            if (!Enum.IsDefined(typeof(CampaignRole), role))
             {
                 return BadRequest();
             }
 
-            // Don't let the GM demote themselves and leave the party with no GM.
-            if (target.Id == current.Id && role != PartyRole.GM)
+            // Don't let the GM demote themselves and leave the campaign with no GM.
+            if (target.UserId == current.Id && role != CampaignRole.GM)
             {
                 return BadRequest();
             }
 
             target.Role = role;
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Details), new { id = target.Id });
+            return RedirectToAction(nameof(Details), new { id = target.UserId });
         }
 
         // GET: Users/Delete/Id
@@ -284,6 +285,13 @@ namespace GroupProject325.Controllers
         private bool UserExists(Guid id)
         {
             return _context.Users.Any(e => e.Id == id);
+        }
+
+        private async Task<bool> SharesCampaignAsync(Guid userId, Guid otherUserId)
+        {
+            return await _context.CampaignMembers.AnyAsync(m =>
+                m.UserId == otherUserId &&
+                _context.CampaignMembers.Any(c => c.UserId == userId && c.CampaignId == m.CampaignId));
         }
 
         // Reads the provider name and provider user ID from the signed-in OAuth identity.

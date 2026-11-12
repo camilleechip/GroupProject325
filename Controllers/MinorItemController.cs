@@ -1,24 +1,31 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using GroupProject325.Authorization;
 using GroupProject325.Models;
 using GroupProject325.Data;
 
 namespace GroupProject325.Controllers;
 
+// The permission checks are commented out until MinorItem.CampaignId is an int linked
+// to Campaign (see docs/ERD.md).
 [Route("minoritems")]
 public class MinorItemController : Controller
 {
     private readonly LedgerContext _context;
+    private readonly IAuthorizationService _authorization;
 
-    public MinorItemController(LedgerContext context)
+    public MinorItemController(LedgerContext context, IAuthorizationService authorization)
     {
         _context = context;
+        _authorization = authorization;
     }
 
     // GET: MinorItems
     [HttpGet]
     public async Task<IActionResult> Index()
     {
+        // if (!await HasPermissionAsync(campaignId, CampaignPermission.ViewPartyInventory)) return Forbid();
         return View(await _context.MinorItem.ToListAsync());
     }
 
@@ -37,6 +44,7 @@ public class MinorItemController : Controller
         {
             return NotFound();
         }
+        // if (!await HasPermissionAsync(minorItem.CampaignId, CampaignPermission.ViewPartyInventory)) return Forbid();
 
         return View(minorItem);
     }
@@ -44,6 +52,7 @@ public class MinorItemController : Controller
     [HttpGet]
     public IActionResult Create()
     {
+        // if (!await HasPermissionAsync(campaignId, CampaignPermission.AddItems)) return Forbid();
         return View();
     }
 
@@ -52,6 +61,7 @@ public class MinorItemController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("CharacterId,ResourceType,Amount,TransactionType,Description")] MinorItem minorItem)
     {
+        // if (!await HasPermissionAsync(campaignId, CampaignPermission.AddItems)) return Forbid();
         if (ModelState.IsValid)
         {
             _context.MinorItem.Add(minorItem);
@@ -75,6 +85,7 @@ public class MinorItemController : Controller
         {
             return NotFound();
         }
+        // if (!await HasPermissionAsync(minorItem.CampaignId, CampaignPermission.EditItems)) return Forbid();
         return View(minorItem);
     }
 
@@ -96,6 +107,7 @@ public class MinorItemController : Controller
             {
                 return NotFound();
             }
+            // if (!await HasPermissionAsync(existingItem.CampaignId, CampaignPermission.EditItems)) return Forbid();
 
             existingItem.ResourceType = minorItem.ResourceType;
             existingItem.Quantity = minorItem.Quantity;
@@ -122,6 +134,7 @@ public class MinorItemController : Controller
         {
             return NotFound();
         }
+        // if (!await HasPermissionAsync(minorItem.CampaignId, CampaignPermission.DeleteItems)) return Forbid();
 
         return View(minorItem);
     }
@@ -135,11 +148,23 @@ public class MinorItemController : Controller
 
         if (minorItem != null)
         {
+            // if (!await HasPermissionAsync(minorItem.CampaignId, CampaignPermission.DeleteItems)) return Forbid();
             _context.MinorItem.Remove(minorItem);
             await _context.SaveChangesAsync();
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    private async Task<bool> HasPermissionAsync(int campaignId, CampaignPermission permission)
+    {
+        var campaign = await _context.Campaigns.FindAsync(campaignId);
+        if (campaign == null)
+        {
+            return false;
+        }
+        var result = await _authorization.AuthorizeAsync(User, campaign, new CampaignPermissionRequirement(permission));
+        return result.Succeeded;
     }
 }
 

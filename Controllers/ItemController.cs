@@ -1,6 +1,8 @@
 using System.Globalization;
+using GroupProject325.Authorization;
 using GroupProject325.Data;
 using GroupProject325.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,19 +10,22 @@ namespace GroupProject325.Controllers;
 
 // Items are listed on the ledger page, so there is no Index action here.
 // Every action finishes by sending the user back to the ledger.
+// The permission checks are commented out until items belong to a campaign (see docs/ERD.md).
 public class ItemController : Controller
 {
     private readonly LedgerContext _context;
+    private readonly IAuthorizationService _authorization;
 
-    public ItemController(LedgerContext context)
+    public ItemController(LedgerContext context, IAuthorizationService authorization)
     {
         _context = context;
+        _authorization = authorization;
     }
 
     // GET: /Item/Create
     public IActionResult Create()
     {
-        // TODO: permission check (Create)
+        // if (!await HasPermissionAsync(campaignId, CampaignPermission.AddItems)) return Forbid();
         return View();
     }
 
@@ -29,7 +34,7 @@ public class ItemController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name,Description,Value,Weight,Quantity")] Item item)
     {
-        // TODO: permission check (Create)
+        // if (!await HasPermissionAsync(campaignId, CampaignPermission.AddItems)) return Forbid();
         // TODO: place the item in the party inventory once inventories exist
         if (!ModelState.IsValid) return View(item);
 
@@ -41,9 +46,9 @@ public class ItemController : Controller
     // GET: /Item/Edit/{id}
     public async Task<IActionResult> Edit(Guid id)
     {
-        // TODO: permission check (Edit)
         var item = await _context.Items.FindAsync(id);
         if (item == null) return NotFound();
+        // if (!await HasPermissionAsync(item.CampaignId, CampaignPermission.EditItems)) return Forbid();
         return View(item);
     }
 
@@ -52,13 +57,13 @@ public class ItemController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, [Bind("Name,Description,Value,Weight,Quantity")] Item form)
     {
-        // TODO: permission check (Edit)
         if (!ModelState.IsValid) return View(form);
 
         // Copy onto the stored item instead of saving the form object, so fields
         // that aren't on the form (Id, CreatedAt) can't be overwritten.
         var item = await _context.Items.FindAsync(id);
         if (item == null) return NotFound();
+        // if (!await HasPermissionAsync(item.CampaignId, CampaignPermission.EditItems)) return Forbid();
 
         item.Name = form.Name;
         item.Description = form.Description;
@@ -77,9 +82,9 @@ public class ItemController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id)
     {
-        // TODO: permission check (Delete)
         var item = await _context.Items.FindAsync(id);
         if (item == null) return NotFound();
+        // if (!await HasPermissionAsync(item.CampaignId, CampaignPermission.DeleteItems)) return Forbid();
 
         // The item's property values are cascade-deleted with it.
         _context.Items.Remove(item);
@@ -93,9 +98,9 @@ public class ItemController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UseUp(Guid id, int amount)
     {
-        // TODO: permission check (UseUp)
         var item = await _context.Items.FindAsync(id);
         if (item == null) return NotFound();
+        // if (!await HasPermissionAsync(item.CampaignId, CampaignPermission.UseItems)) return Forbid();
 
         if (amount <= 0 || amount > item.Quantity)
         {
@@ -122,12 +127,12 @@ public class ItemController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Split(Guid id, int amount)
     {
-        // TODO: permission check (Split)
         // TODO: put the new stack in the requesting player's inventory once inventories exist
         var item = await _context.Items
             .Include(i => i.PropertyValues)
             .FirstOrDefaultAsync(i => i.Id == id);
         if (item == null) return NotFound();
+        // if (!await HasPermissionAsync(item.CampaignId, CampaignPermission.UseItems)) return Forbid();
 
         // Splitting the whole stack (or more) isn't a split; at least 1 must stay behind.
         if (amount <= 0 || amount >= item.Quantity)
@@ -170,13 +175,13 @@ public class ItemController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetProperty(Guid itemId, Guid customPropertyId, string? value, List<Guid>? optionIds)
     {
-        // TODO: permission check (Edit)
         optionIds ??= new List<Guid>();
 
         var item = await _context.Items
             .Include(i => i.PropertyValues)
             .FirstOrDefaultAsync(i => i.Id == itemId);
         if (item == null) return NotFound();
+        // if (!await HasPermissionAsync(item.CampaignId, CampaignPermission.EditItems)) return Forbid();
 
         var property = await _context.CustomProperties
             .Include(p => p.Options)
@@ -249,11 +254,11 @@ public class ItemController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveProperty(Guid itemId, Guid customPropertyId)
     {
-        // TODO: permission check (Edit)
         var item = await _context.Items
             .Include(i => i.PropertyValues)
             .FirstOrDefaultAsync(i => i.Id == itemId);
         if (item == null) return NotFound();
+        // if (!await HasPermissionAsync(item.CampaignId, CampaignPermission.EditItems)) return Forbid();
 
         var values = item.PropertyValues.Where(v => v.CustomPropertyId == customPropertyId).ToList();
         if (values.Count == 0) return NotFound();
@@ -266,6 +271,14 @@ public class ItemController : Controller
     }
 
     // TODO: Claim, Return, Give once inventories exist.
+
+    private async Task<bool> HasPermissionAsync(int campaignId, CampaignPermission permission)
+    {
+        var campaign = await _context.Campaigns.FindAsync(campaignId);
+        if (campaign == null) return false;
+        var result = await _authorization.AuthorizeAsync(User, campaign, new CampaignPermissionRequirement(permission));
+        return result.Succeeded;
+    }
 
     // There's no ledger page yet, so go home for now. Change this when it exists.
     private IActionResult BackToLedger() => RedirectToAction("Index", "Home");

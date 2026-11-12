@@ -1,4 +1,7 @@
+using GroupProject325.Authorization;
 using GroupProject325.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +11,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddDbContext<LedgerContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("LedgerContext")));
+
+// OAuth gets added to this later. The cookie scheme keeps [Authorize] from crashing until then.
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+builder.Services.AddAuthorization();
+builder.Services.AddScoped<IAuthorizationHandler, CampaignPermissionHandler>();
 
 var app = builder.Build();
 
@@ -22,6 +30,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 

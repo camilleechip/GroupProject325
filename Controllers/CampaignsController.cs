@@ -45,6 +45,20 @@ public class CampaignsController : ControllerBase
         }
 
         campaign.CreatedAt = DateTime.UtcNow;
+
+        // Members come from the request body too, so clear them. Otherwise anyone could add themselves as GM.
+        campaign.Members.Clear();
+
+        // Make the creator the GM. Enable once OAuth sign-in exists.
+        // var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+        // var creator = await _context.Users.FirstOrDefaultAsync(u =>
+        //     u.OAuthProvider == claim!.Issuer && u.OAuthSubject == claim.Value);
+        // if (creator == null)
+        // {
+        //     return Unauthorized();
+        // }
+        // campaign.Members.Add(new CampaignMember { UserId = creator.Id, Role = CampaignRole.GM });
+
         _context.Campaigns.Add(campaign);
         await _context.SaveChangesAsync();
 
