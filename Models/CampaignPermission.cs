@@ -10,5 +10,7 @@ public enum CampaignPermission
     ViewPartyInventory = 1 << 0,
     AddItems = 1 << 1,
     EditItems = 1 << 2,
-    DeleteItems = 1 << 3
+    DeleteItems = 1 << 3,
+    UseItems = 1 << 4,
+    ManageProperties = 1 << 5
 }

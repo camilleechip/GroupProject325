@@ -60,11 +60,18 @@ erDiagram
 | 10 | 2026-11-12 | `PartyRole` renamed to `CampaignRole`; `User.PartyId` removed. | Roles now belong to a campaign, not a party. | — |
 | 11 | 2026-11-12 | Register a cookie authentication scheme with no OAuth yet. | `[Authorize]` crashed without any scheme; now it redirects to a login URL instead. | Leave it broken until the OAuth task. |
 | 12 | 2026-11-12 | Permission checks use resource-based authorization (`CampaignPermissionHandler`). GM always passes; Member passes if the campaign's `MemberPermissions` has the flag. | Permissions depend on *which* campaign, so a plain `[Authorize(Roles = ...)]` can't express them. | Role claims in the cookie. |
+| 13 | 2026-11-12 | Items get linked to a campaign through inventories, not a `CampaignId` on Item. Until then, permission checks in Item, CustomProperty and MinorItem controllers are written but commented out. | Inventories decide where an item lives, so linking now would be redone later. | Required or nullable `CampaignId` on Item. |
+| 14 | 2026-11-12 | Added `UseItems` (UseUp, Split) and `ManageProperties` (CustomProperty actions) flags. | Lets a GM allow using items without allowing edits. `ManageProperties` matches the existing TODOs. | Reuse `EditItems` for UseUp/Split. |
+| 15 | 2026-11-12 | MinorItem reuses the item flags: `ViewPartyInventory`, `AddItems`, `EditItems`, `DeleteItems`. *(review)* | Keeps the flag list short. | Separate flags for gold/XP. |
+| 16 | 2026-11-12 | Delete stays behind `DeleteItems` and is meant to be used rarely. Later: a transaction table logs every change to an Item or MinorItem (created, edited, used up, XP given, gold spent), so items are never truly deleted. | Keeps history for each item. | Hard delete. |
+| 17 | 2026-11-12 | The campaign creator becomes GM (written, commented out until OAuth). `CreateCampaign` clears any `Members` sent in the request. | Without clearing, anyone could post themselves in as GM. | — |
 
 ## Open questions
 
 - What happens to `Campaign.GameMaster` (a text name) now that the GM comes from `CampaignMember`? (Left in place for now.)
 - Is "Party" the same thing as "Campaign"?
 - Who creates the first EF Core migration, so teammates don't create conflicting ones?
-- When a campaign is created, the creator should become its GM. That needs a signed-in user, so it waits for the OAuth task.
-- Hook `CampaignPermissionHandler` into the Item/Campaign controllers (not done in this branch).
+- `MinorItem.CampaignId` is a `string`, but `Campaign.Id` is an `int`. It needs to be an `int` FK before its checks can be enabled.
+- `CustomProperty` has no campaign link yet either. Should properties be per campaign?
+- Soft delete (e.g. `IsDeleted`) + transaction table design (decision 16).
+- No endpoint yet for a GM to change a campaign's `MemberPermissions`.

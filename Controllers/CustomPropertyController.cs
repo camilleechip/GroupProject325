@@ -1,5 +1,7 @@
+using GroupProject325.Authorization;
 using GroupProject325.Data;
 using GroupProject325.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,19 +10,22 @@ namespace GroupProject325.Controllers;
 // Manages custom property definitions (like "Rarity") and their options
 // (like "Common", "Rare"). Setting a property's value on an item lives in
 // ItemController.SetProperty.
+// The permission checks are commented out until properties belong to a campaign (see docs/ERD.md).
 public class CustomPropertyController : Controller
 {
     private readonly LedgerContext _context;
+    private readonly IAuthorizationService _authorization;
 
-    public CustomPropertyController(LedgerContext context)
+    public CustomPropertyController(LedgerContext context, IAuthorizationService authorization)
     {
         _context = context;
+        _authorization = authorization;
     }
 
     // GET: /CustomProperty/Create
     public IActionResult Create()
     {
-        // TODO: permission check (ManageProperties)
+        // if (!await HasPermissionAsync(campaignId, CampaignPermission.ManageProperties)) return Forbid();
         return View();
     }
 
@@ -29,7 +34,7 @@ public class CustomPropertyController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name,Description,ValueType,AllowMultiple")] CustomProperty property)
     {
-        // TODO: permission check (ManageProperties)
+        // if (!await HasPermissionAsync(campaignId, CampaignPermission.ManageProperties)) return Forbid();
         // TODO: scope names to a party once parties exist, so groups don't clash
         if (await NameTaken(property.Name, null))
         {
@@ -48,11 +53,11 @@ public class CustomPropertyController : Controller
     // GET: /CustomProperty/Edit/{id}
     public async Task<IActionResult> Edit(Guid id)
     {
-        // TODO: permission check (ManageProperties)
         var property = await _context.CustomProperties
             .Include(p => p.Options)
             .FirstOrDefaultAsync(p => p.Id == id);
         if (property == null) return NotFound();
+        // if (!await HasPermissionAsync(property.CampaignId, CampaignPermission.ManageProperties)) return Forbid();
         return View(property);
     }
 
@@ -61,9 +66,9 @@ public class CustomPropertyController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, [Bind("Name,Description,ValueType,AllowMultiple")] CustomProperty form)
     {
-        // TODO: permission check (ManageProperties)
         var property = await _context.CustomProperties.FindAsync(id);
         if (property == null) return NotFound();
+        // if (!await HasPermissionAsync(property.CampaignId, CampaignPermission.ManageProperties)) return Forbid();
 
         if (await NameTaken(form.Name, id))
         {
@@ -101,9 +106,9 @@ public class CustomPropertyController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id)
     {
-        // TODO: permission check (ManageProperties)
         var property = await _context.CustomProperties.FindAsync(id);
         if (property == null) return NotFound();
+        // if (!await HasPermissionAsync(property.CampaignId, CampaignPermission.ManageProperties)) return Forbid();
 
         int usedBy = await _context.ItemPropertyValues
             .Where(v => v.CustomPropertyId == id)
@@ -126,11 +131,11 @@ public class CustomPropertyController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddOption(Guid propertyId, string? value)
     {
-        // TODO: permission check (ManageProperties)
         var property = await _context.CustomProperties
             .Include(p => p.Options)
             .FirstOrDefaultAsync(p => p.Id == propertyId);
         if (property == null) return NotFound();
+        // if (!await HasPermissionAsync(property.CampaignId, CampaignPermission.ManageProperties)) return Forbid();
 
         if (property.ValueType != PropertyValueType.List)
         {
@@ -163,9 +168,10 @@ public class CustomPropertyController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteOption(Guid id)
     {
-        // TODO: permission check (ManageProperties)
         var option = await _context.PropertyOptions.FindAsync(id);
         if (option == null) return NotFound();
+        // var property = await _context.CustomProperties.FindAsync(option.CustomPropertyId);
+        // if (!await HasPermissionAsync(property!.CampaignId, CampaignPermission.ManageProperties)) return Forbid();
 
         int usedBy = await _context.ItemPropertyValues.CountAsync(v => v.PropertyOptionId == id);
         if (usedBy > 0)
@@ -192,6 +198,14 @@ public class CustomPropertyController : Controller
             .Where(v => v.CustomPropertyId == propertyId)
             .GroupBy(v => v.ItemId)
             .AnyAsync(g => g.Count() > 1);
+    }
+
+    private async Task<bool> HasPermissionAsync(int campaignId, CampaignPermission permission)
+    {
+        var campaign = await _context.Campaigns.FindAsync(campaignId);
+        if (campaign == null) return false;
+        var result = await _authorization.AuthorizeAsync(User, campaign, new CampaignPermissionRequirement(permission));
+        return result.Succeeded;
     }
 
     // There's no ledger page yet, so go home for now. Change this when it exists.
