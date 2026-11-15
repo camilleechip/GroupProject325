@@ -15,6 +15,13 @@ public class MinorItemController : Controller
     {
         _context = context;
     }
+    //GET: MinorItems/Index
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var minorItems = await _context.MinorItem.ToListAsync();
+        return View(minorItems);
+    }
 
     // GET: MinorItems/Details
     [HttpGet]
@@ -94,6 +101,7 @@ public class MinorItemController : Controller
             existingItem.ResourceType = minorItem.ResourceType;
             existingItem.Quantity = minorItem.Quantity;
             existingItem.TransactionType = minorItem.TransactionType;
+            existingItem.Description = minorItem.Description;
 
             await _context.SaveChangesAsync();
 
