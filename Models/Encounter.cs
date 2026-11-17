@@ -41,12 +41,16 @@ public class Encounter
 
     // The campaign this encounter belongs to.
     // Campaign uses an int for its id, so this has to be an int too.
-    // TODO: add a Campaign navigation property once Campaign's namespace is fixed.
     public int CampaignId { get; set; }
+
+    // The campaign itself, so code can write encounter.Campaign.Title.
+    // EF Core links it to CampaignId automatically because the names match.
+    // It's null unless the campaign is loaded with .Include(e => e.Campaign).
+    public Campaign? Campaign { get; set; }
 
     // The id of the GM who created this encounter.
     // User uses a Guid for its id, so this is a Guid.
-    // TODO: add a User navigation property once User is in LedgerContext
+    // The link to User is set up in LedgerContext (User -> Encounters).
     public Guid CreatedByUserId { get; set; }
 
     // The items this encounter gives out, like a sword or a bag of gems.
