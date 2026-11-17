@@ -206,6 +206,29 @@ public class EncounterController : Controller
         return RedirectToAction("Details", new { id = encounterId });
     }
 
+    // POST: /Encounter/Delete/{id}
+    // Deletes an encounter and its items.
+    // Only allowed before the rewards are given out, so the ledger history stays correct.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        // TODO: permission check, only the GM can delete encounters
+
+        // Find the encounter, and load its items too so they can be deleted with it
+        var encounter = await _context.Encounters
+            .Include(e => e.Items)
+            .FirstOrDefaultAsync(e => e.Id == id);
+
+        // If no encounter has that id, show a 404 not found page
+        if (encounter == null) return NotFound();
+
+        // Can't delete after the rewards were given out.
+        // The campaign already got the gold, xp, and items, so deleting this
+        // would erase where they came from and break the ledger history.
+        if (encounter.RewardsApplied) return Locked(id);
+    }
+
     // Shows an error when someone tries to change an encounter whose rewards
     // were already given out, then sends them back to the Details page.
     // It's private because it's a helper, not a page anyone can visit.
