@@ -1,0 +1,31 @@
+@model IEnumerable<GroupProject325.Models.MinorItem>
+
+<h2>Minor Inventory Items</h2>
+<a asp-action="Create" class="btn btn-primary">Add New Item</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Resource Type</th>
+            <th>Transaction Type</th>
+            <th>Quantity</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ResourceType</td>
+                <td>@item.TransactionType</td>
+                <td>@item.Quantity</td>
+                <td>@item.Description</td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.Id })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

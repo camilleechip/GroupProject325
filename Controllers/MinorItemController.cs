@@ -5,7 +5,8 @@ using GroupProject325.Data;
 
 namespace GroupProject325.Controllers;
 
-[Route("minoritems")]
+//items are listed on ledger page, no need for index
+//every action finishes by redirecting to ledger page
 public class MinorItemController : Controller
 {
     private readonly LedgerContext _context;
@@ -14,12 +15,12 @@ public class MinorItemController : Controller
     {
         _context = context;
     }
-
-    // GET: MinorItems
+    //GET: MinorItems/Index
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        return View(await _context.MinorItem.ToListAsync());
+        var minorItems = await _context.MinorItem.ToListAsync();
+        return View(minorItems);
     }
 
     // GET: MinorItems/Details
@@ -50,13 +51,13 @@ public class MinorItemController : Controller
     // POST: MinorItems/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("CharacterId,ResourceType,Amount,TransactionType,Description")] MinorItem minorItem)
+    public async Task<IActionResult> Create([Bind("CharacterId,ResourceType,Quantity,TransactionType,Description")] MinorItem minorItem)
     {
         if (ModelState.IsValid)
         {
             _context.MinorItem.Add(minorItem);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return BackToLedger();
         }
         return View(minorItem);
     }
@@ -81,7 +82,7 @@ public class MinorItemController : Controller
     // POST: MinorItems/Edit
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,ResourceType,Amount,TransactionType")] MinorItem minorItem)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,ResourceType,Quantity,TransactionType,Description")] MinorItem minorItem)
     {
         if (id != minorItem.Id)
         {
@@ -100,10 +101,11 @@ public class MinorItemController : Controller
             existingItem.ResourceType = minorItem.ResourceType;
             existingItem.Quantity = minorItem.Quantity;
             existingItem.TransactionType = minorItem.TransactionType;
+            existingItem.Description = minorItem.Description;
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return BackToLedger();
         }
         return View(minorItem);
     }
@@ -139,7 +141,12 @@ public class MinorItemController : Controller
             await _context.SaveChangesAsync();
         }
 
-        return RedirectToAction(nameof(Index));
+        return BackToLedger();
+    }
+
+    private IActionResult BackToLedger()
+    {
+        return RedirectToAction("Index", "Home");
     }
 }
 

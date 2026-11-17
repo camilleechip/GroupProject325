@@ -1,36 +1,35 @@
 @model GroupProject325.Models.MinorItem
 
-<h2>Add New Item</h2>
+<h2>Add New Minor Item</h2>
 
 <form asp-action="Create" method="post">
+
     <div class="mb-3">
-        <label asp-for="Name" class="form-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+        <label asp-for="ResourceType" class="form-label"></label>
+        <select asp-for="ResourceType" class="form-select"
+                asp-items="Html.GetEnumSelectList<ResourceType>()">
+        </select>
+        <span asp-validation-for="ResourceType" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Description" class="form-label"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Value" class="form-label"></label>
-        <input asp-for="Value" type="number" step="0.01" class="form-control" />
-        <span asp-validation-for="Value" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Weight" class="form-label"></label>
-        <input asp-for="Weight" type="number" step="0.01" class="form-control" />
-        <span asp-validation-for="Weight" class="text-danger"></span>
+        <label asp-for="TransactionType" class="form-label"></label>
+        <select asp-for="TransactionType" class="form-select"
+                asp-items="Html.GetEnumSelectList<TransactionType>()">
+        </select>
+        <span asp-validation-for="TransactionType" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="Quantity" class="form-label"></label>
         <input asp-for="Quantity" type="number" step="1" class="form-control" />
         <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <input asp-for="Description" class="form-control" />    
+        <span asp-validation-for="Description" class="text-danger"></span>
     </div>
     
     <button type="submit" class="btn btn-primary">Add Item</button>

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace CampaignExample.Models;
+namespace GroupProject325.Models;
 
 /// <summary>
 /// Represents a Tabletop Role-Playing Game (TTRPG) campaign session/group.
