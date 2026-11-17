@@ -11,6 +11,13 @@ builder.Services.AddDbContext<LedgerContext>(options =>
 
 var app = builder.Build();
 
+// Ensure SQLite database and tables are created
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<LedgerContext>();
+    db.Database.EnsureCreated();
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -31,6 +38,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+app.MapControllers();
 app.MapRazorComponents<GroupProject325.Components.App>().AddInteractiveServerRenderMode();
 
 app.Run();
