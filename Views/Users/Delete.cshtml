@@ -1,0 +1,27 @@
+@model GroupProject325.Models.User
+
+@{
+    ViewData["Title"] = "Delete Account";
+}
+
+<h1>Delete Account</h1>
+
+<h3 class="error">Are you sure you want to delete your account?</h3>
+<p>Your inventory will be deleted with it, and you will be signed out.</p>
+
+<dl class="details">
+    <dt>@Html.DisplayNameFor(m => m.UserName)</dt>
+    <dd>@Model.UserName</dd>
+
+    <dt>@Html.DisplayNameFor(m => m.Email)</dt>
+    <dd>@Model.Email</dd>
+
+    <dt>@Html.DisplayNameFor(m => m.Role)</dt>
+    <dd>@Model.Role</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="button button-danger">Delete</button>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="button button-secondary">Cancel</a>
+</form>

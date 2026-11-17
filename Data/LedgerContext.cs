@@ -15,8 +15,6 @@ public class LedgerContext : DbContext
     public DbSet<Campaign> Campaigns => Set<Campaign>();
 
     public DbSet<User> Users => Set<User>();
-    // COMMENTING THIS OUT UNTIL PARTY IS DEFINED
-    // public DbSet<Party> Parties => Set<Party>();
     public DbSet<UserInventory> UserInventories => Set<UserInventory>();
     // COMMENTING THIS OUT UNTIL ENCOUNTER IS DEFINED
     // public DbSet<Encounter> Encounters => Set<Encounter>();
