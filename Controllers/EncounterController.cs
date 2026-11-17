@@ -227,6 +227,19 @@ public class EncounterController : Controller
         // The campaign already got the gold, xp, and items, so deleting this
         // would erase where they came from and break the ledger history.
         if (encounter.RewardsApplied) return Locked(id);
+
+        // The items were never given to anyone (rewards weren't applied),
+        // so delete them along with the encounter instead of leaving them behind
+        _context.Items.RemoveRange(encounter.Items);
+
+        // Delete the encounter itself
+        _context.Encounters.Remove(encounter);
+
+        // Actually delete everything (nothing is removed until this runs)
+        await _context.SaveChangesAsync();
+
+        // The encounter is gone, so go back to the list of encounters
+        return RedirectToAction("Index");
     }
 
     // Shows an error when someone tries to change an encounter whose rewards
