@@ -27,7 +27,6 @@ else
             <tr>
                 <th>@Html.DisplayNameFor(m => m.UserName)</th>
                 <th>@Html.DisplayNameFor(m => m.Email)</th>
-                <th>@Html.DisplayNameFor(m => m.Role)</th>
                 <th></th>
             </tr>
         </thead>
@@ -38,7 +37,6 @@ else
                 <tr>
                     <td>@item.UserName @(isSelf ? "(you)" : "")</td>
                     <td>@item.Email</td>
-                    <td>@item.Role</td>
                     <td>
                         <a asp-action="Details" asp-route-id="@item.Id">Details</a>
                         @if (isSelf)

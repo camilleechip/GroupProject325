@@ -24,12 +24,8 @@ public class User
     [Required, StringLength(255)]
     public string OAuthSubject { get; set; } = string.Empty;
 
-    public PartyRole Role { get; set; } = PartyRole.Member;
-
-    // The ID of the campaign the user belongs to. It is null until the user joins one.
-    // Must be int? to match Campaign.Id.
-    public int? CampaignId { get; set; }
-    public Campaign? Campaign { get; set; }
+    // The campaigns this user belongs to, and their role in each.
+    public List<CampaignMember> Memberships { get; set; } = new();
 
     // This user's personal inventory of items. Each user has one, and it is 
     // created and deleted together with the user. 

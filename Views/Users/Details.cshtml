@@ -6,7 +6,7 @@
     ViewData["Title"] = "User Details";
     var isSelf = Model.OAuthSubject == User.FindFirst(ClaimTypes.NameIdentifier)?.Value
     && Model.OAuthProvider == User.FindFirst(ClaimTypes.NameIdentifier)?.Issuer;
-    var canChangeRole = ViewBag.CanChangeRole as bool? ?? false;
+    var gmCampaignIds = ViewBag.GmCampaignIds as List<int> ?? new List<int>();
 }
 
 <h1>User Details</h1>
@@ -21,25 +21,31 @@
     <dt>Sign-in provider</dt>
     <dd>@Model.OAuthProvider</dd>
 
-    <dt>@Html.DisplayNameFor(m => m.Role)</dt>
-    <dd>@Model.Role</dd>
-
-    <dt>Campaign</dt>
-    <dd>@(Model.Campaign?.Title ?? "Not in a campaign")</dd>
-</dl>
-
-@if (canChangeRole)
-{
-    <form asp-action="ChangeRole" asp-route-id="@Model.Id" method="post" class="inline-form">
-        <select name="role">
-            @foreach (var r in Enum.GetValues<PartyRole>())
+    <dt>Campaigns</dt>
+    @if (Model.Memberships.Count == 0)
+    {
+        <dd>Not in a campaign</dd>
+    }
+    @foreach (var membership in Model.Memberships)
+    {
+        <dd>
+            @membership.Campaign?.Title (@membership.Role)
+            @if (gmCampaignIds.Contains(membership.CampaignId))
             {
-                <option value="@r" selected="@(r == Model.Role)">@r</option>
+                <form asp-action="ChangeRole" asp-route-id="@Model.Id" method="post" class="inline-form">
+                    <input type="hidden" name="campaignId" value="@membership.CampaignId" />
+                    <select name="role">
+                        @foreach (var r in Enum.GetValues<CampaignRole>())
+                        {
+                            <option value="@r" selected="@(r == membership.Role)">@r</option>
+                        }
+                    </select>
+                    <button type="submit" class="button">Change Role</button>
+                </form>
             }
-        </select>
-        <button type="submit" class="button">Change Role</button>
-    </form>
-}
+        </dd>
+    }
+</dl>
 
 <p>
     @if (isSelf)
