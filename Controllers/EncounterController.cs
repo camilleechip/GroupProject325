@@ -242,6 +242,65 @@ public class EncounterController : Controller
         return RedirectToAction("Index");
     }
 
+    // POST: /Encounter/ApplyRewards/{id}
+    // Gives the encounter's gold, xp, and items to its campaign, then locks the encounter.
+    // This can only happen once, so nothing is ever given out twice.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ApplyRewards(Guid id)
+    {
+        // TODO: permission check, only the GM can apply rewards
+
+        // Find the encounter, and load its items and its campaign too,
+        // because the rewards are going from the encounter to the campaign
+        var encounter = await _context.Encounters
+            .Include(e => e.Items)
+            .Include(e => e.Campaign)
+            .FirstOrDefaultAsync(e => e.Id == id);
+
+        // If no encounter has that id, show a 404 not found page
+        if (encounter == null) return NotFound();
+
+        // Rewards can only be given out once.
+        // If they were already applied, stop here so nothing is given twice.
+        if (encounter.RewardsApplied) return Locked(id);
+
+        // The rewards need somewhere to go. If the campaign is missing
+        // (for example, it was deleted), show an error instead of crashing.
+        if (encounter.Campaign == null)
+        {
+            TempData["Error"] = "This encounter isn't linked to a campaign, so the rewards have nowhere to go.";
+            return RedirectToAction("Details", new { id });
+        }
+
+        // Give the gold and xp to the campaign.
+        // TODO: Campaign doesn't have Gold or Experience yet. Once it does, remove the // on these:
+        // encounter.Campaign.Gold += encounter.GoldReward;
+        // encounter.Campaign.Experience += encounter.XpReward;
+
+        // Move the reward items into the campaign's shared (party) inventory.
+        // TODO: once a party/campaign inventory exists, link each item to it, for example:
+        // foreach (var item in encounter.Items)
+        // {
+        //     item.CampaignInventoryId = encounter.Campaign.InventoryId;
+        // }
+
+        // TODO: once the transaction table exists, record this, like "GM awarded 50 gold"
+
+        // Lock the encounter so the same rewards can never be given out again
+        encounter.RewardsApplied = true;
+
+        // Record when it was last changed (this is when the rewards were given)
+        encounter.UpdatedAt = DateTime.UtcNow;
+
+        // Save everything at once: the lock now, plus the gold, xp, and items once those TODOs are done.
+        // If anything fails, nothing is saved, so the campaign and encounter can't get out of sync.
+        await _context.SaveChangesAsync();
+
+        // Go back to the Details page, which will now show the encounter as applied
+        return RedirectToAction("Details", new { id });
+    }
+
     // Shows an error when someone tries to change an encounter whose rewards
     // were already given out, then sends them back to the Details page.
     // It's private because it's a helper, not a page anyone can visit.
