@@ -1,0 +1,54 @@
+@* The list of all encounters. Comes from EncounterController.Index() *@
+@model IEnumerable<GroupProject325.Models.Encounter>
+
+<h2>Encounters</h2>
+
+@* Button to make a new encounter. Goes to EncounterController.Create() *@
+<a asp-action="Create" class="btn btn-primary">New Encounter</a>
+
+@* Table of encounters. Each row is one encounter.*@
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Gold</th>
+            <th>XP</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* Loop through every encounter and make a row for each one *@
+        @foreach (var encounter in Model)
+        {
+            <tr>
+                <td>@encounter.Title</td>
+
+                @* N2 = number with 2 decimal places, like 1,250.50 *@
+                <td>@encounter.GoldReward.ToString("N2")</td>
+
+                <td>@encounter.XpReward</td>
+
+                @* Show whether the rewards have been given out yet *@
+                <td>@(encounter.RewardsApplied ? "Applied" : "Not applied")</td>
+
+                @* Convert from UTC to the server's local time, then show it like "Nov 17, 2026" *@
+                <td>@encounter.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+
+                @* Delete and Apply Rewards are buttons on the Details page,
+                   because they change data and need to be POST forms *@
+                <td>
+                    <a asp-action="Details" asp-route-id="@encounter.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@encounter.Id">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@* If there are no encounters yet, say so instead of showing an empty table *@
+@if (!Model.Any())
+{
+    <p>No encounters yet. Click "New Encounter" to make the first one.</p>
+}
