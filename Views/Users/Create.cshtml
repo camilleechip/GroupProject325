@@ -1,0 +1,33 @@
+@using System.Security.Claims
+@model GroupProject325.Models.User
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>Register</h1>
+<p>Choose a display name to finish setting up your account.</p>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="error"></div>
+
+    <div class="field">
+        <label>Email</label>
+        <input value="@User.FindFirstValue(ClaimTypes.Email)" readonly />
+        <div class="hint">Taken from your sign-in account.</div>
+    </div>
+
+    <div class="field">
+        <label asp-for="UserName"></label>
+        <input asp-for="UserName" />
+        <span asp-validation-for="UserName" class="error"></span>
+    </div>
+
+    <button type="submit" class="button">Register</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

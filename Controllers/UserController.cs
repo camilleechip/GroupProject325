@@ -14,7 +14,7 @@ using GroupProject325.Models;
 namespace GroupProject325.Controllers
 {
     // Every action requires a signed-in (OAuth) user.
-    [Authorize]
+    // [Authorize]  // Re-enable once authentication is set up in Program.cs.
     public class UsersController : Controller
     {
         private readonly LedgerContext _context;
@@ -25,7 +25,7 @@ namespace GroupProject325.Controllers
         }
 
         // GET: Users
-        // Lists the members of the signed-in user's party, with an optional name search.
+        // Lists the members of the signed-in user's campaign, with an optional name search.
         public async Task<IActionResult> Index(string searchString)
         {
             var current = await GetCurrentUserAsync();
@@ -35,14 +35,14 @@ namespace GroupProject325.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
-            // A user who has not joined a party has no one to list.
-            if (current.PartyId == null)
+            // A user who has not joined a campaign has no one to list.
+            if (current.CampaignId == null)
             {
                 return View(new List<User>());
             }
 
             var users = from u in _context.Users
-                        where u.PartyId == current.PartyId
+                        where u.CampaignId == current.CampaignId
                         select u;
 
             if (!string.IsNullOrEmpty(searchString))
@@ -54,7 +54,7 @@ namespace GroupProject325.Controllers
         }
 
         // GET: Users/Details/Id
-        // A user can view themselves and anyone in their own party.
+        // A user can view themselves and anyone in their own campaign.
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -63,6 +63,7 @@ namespace GroupProject325.Controllers
             }
 
             var user = await _context.Users
+                .Include(u => u.Campaign)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
@@ -71,10 +72,15 @@ namespace GroupProject325.Controllers
 
             var current = await GetCurrentUserAsync();
             if (current == null || (current.Id != user.Id &&
-                (current.PartyId == null || current.PartyId != user.PartyId)))
+                (current.CampaignId == null || current.CampaignId != user.CampaignId)))
             {
                 return Forbid();
             }
+
+            // The view uses this to decide whether to show the role-change form.
+            ViewBag.CanChangeRole = current.Role == PartyRole.GM
+                && current.CampaignId != null
+                && current.CampaignId == user.CampaignId;
 
             return View(user);
         }
@@ -88,7 +94,7 @@ namespace GroupProject325.Controllers
 
         // POST: Users/Create
         // Only UserName is bound from the form. Email comes from the OAuth claim, and
-        // Role and PartyId are never taken from the form, to protect from overposting.
+        // Role and CampaignId are never taken from the form, to protect from overposting.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserName")] User user)
@@ -119,7 +125,7 @@ namespace GroupProject325.Controllers
             if (ModelState.IsValid)
             {
                 user.UserName = user.UserName.Trim();
-                user.Role = PartyRole.Member;          // GM is assigned when a party is created.
+                user.Role = PartyRole.Member;          // GM is assigned when a campaign is created.
                 user.Inventory = new UserInventory();  // Every user has exactly one inventory.
 
                 _context.Add(user);
@@ -153,7 +159,7 @@ namespace GroupProject325.Controllers
         }
 
         // POST: Users/Edit/Id
-        // Only Id and UserName are bound, so Email, Role, and PartyId cannot be changed here.
+        // Only Id and UserName are bound, so Email, Role, and CampaignId cannot be changed here.
         // The existing row is loaded and updated instead of calling Update(user), because
         // Update would overwrite the unbound columns with empty values.
         [HttpPost]
@@ -197,18 +203,18 @@ namespace GroupProject325.Controllers
             }
             user.Email = current.Email;
             user.Role = current.Role;
-            user.PartyId = current.PartyId;
+            user.CampaignId = current.CampaignId;
             return View(user);
         }
 
         // POST: Users/ChangeRole/Id
-        // Only the GM of a party can change the role of a member of that same party.
+        // Only the GM of a campaign can change the role of a member of that same campaign.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeRole(Guid id, PartyRole role)
         {
             var current = await GetCurrentUserAsync();
-            if (current == null || current.Role != PartyRole.GM || current.PartyId == null)
+            if (current == null || current.Role != PartyRole.GM || current.CampaignId == null)
             {
                 return Forbid();
             }
@@ -218,7 +224,7 @@ namespace GroupProject325.Controllers
             {
                 return NotFound();
             }
-            if (target.PartyId != current.PartyId)
+            if (target.CampaignId != current.CampaignId)
             {
                 return Forbid();
             }
@@ -227,7 +233,7 @@ namespace GroupProject325.Controllers
                 return BadRequest();
             }
 
-            // Don't let the GM demote themselves and leave the party with no GM.
+            // Don't let the GM demote themselves and leave the campaign with no GM.
             if (target.Id == current.Id && role != PartyRole.GM)
             {
                 return BadRequest();

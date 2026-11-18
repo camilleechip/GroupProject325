@@ -26,14 +26,10 @@ public class User
 
     public PartyRole Role { get; set; } = PartyRole.Member;
 
-    // The ID of the party the user belongs to. It is null until the user joins a party.
-    // Stored as a foreign key in the Users table.
-    public Guid? PartyId { get; set; }
-
-    // The party the user belongs to, so code can write user.Party.Name. 
-    // It is null until the user joins a party. Many users can share one party.
-    // COMMENTING THIS OUT UNTIL PARTY IS DEFINED
-    // public Party? Party { get; set; }
+    // The ID of the campaign the user belongs to. It is null until the user joins one.
+    // Must be int? to match Campaign.Id.
+    public int? CampaignId { get; set; }
+    public Campaign? Campaign { get; set; }
 
     // This user's personal inventory of items. Each user has one, and it is 
     // created and deleted together with the user. 
