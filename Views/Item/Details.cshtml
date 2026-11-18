@@ -1,0 +1,49 @@
+@model GroupProject325.Models.Item
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<article class="card no-hover">
+    <h3>@Model.Name</h3>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <p>@Model.Description</p>
+    }
+
+    <div>
+        <span class="card-tag">Qty @Model.Quantity</span>
+        @if (Model.Value != null)
+        {
+            <span class="card-tag">Value @Model.Value</span>
+        }
+        @if (Model.Weight != null)
+        {
+            <span class="card-tag">Weight @Model.Weight</span>
+        }
+    </div>
+
+    @if (Model.PropertyValues.Any())
+    {
+        <dl>
+            @foreach (var propertyValue in Model.PropertyValues)
+            {
+                <dt>@propertyValue.CustomProperty.Name</dt>
+                @if (propertyValue.PropertyOption != null)
+                {
+                    <dd>@propertyValue.PropertyOption.Value</dd>
+                }
+                else
+                {
+                    <dd>@propertyValue.Value</dd>
+                }
+            }
+        </dl>
+    }
+
+    <div class="card-footer">
+        <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+        <span>Updated @Model.UpdatedAt.ToLocalTime().ToString("g")</span>
+    </div>
+</article>

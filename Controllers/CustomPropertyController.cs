@@ -26,7 +26,7 @@ public class CustomPropertyController : Controller
     public IActionResult Create()
     {
         // if (!await HasPermissionAsync(campaignId, CampaignPermission.ManageProperties)) return Forbid();
-        return View();
+        return View(new CustomProperty());
     }
 
     // POST: /CustomProperty/Create
@@ -88,7 +88,13 @@ public class CustomPropertyController : Controller
             ModelState.AddModelError(nameof(form.AllowMultiple), "Some items have more than one option set. Fix those first.");
         }
 
-        if (!ModelState.IsValid) return View(form);
+        if (!ModelState.IsValid)
+        {
+            // form only has the bound fields, so give the view back the Id and options.
+            form.Id = id;
+            form.Options = await _context.PropertyOptions.Where(o => o.CustomPropertyId == id).ToListAsync();
+            return View(form);
+        }
 
         property.Name = form.Name;
         property.Description = form.Description;
@@ -186,10 +192,12 @@ public class CustomPropertyController : Controller
 
     // Case-insensitive, so "Rarity" and "rarity" count as the same name.
     // ignoreId lets Edit skip the property being edited.
-    private Task<bool> NameTaken(string name, Guid? ignoreId)
+    private async Task<bool> NameTaken(string? name, Guid? ignoreId)
     {
+        // An empty name is already caught by [Required], so there's nothing to compare.
+        if (string.IsNullOrWhiteSpace(name)) return false;
         string lowered = name.Trim().ToLower();
-        return _context.CustomProperties.AnyAsync(p => p.Name.ToLower() == lowered && p.Id != ignoreId);
+        return await _context.CustomProperties.AnyAsync(p => p.Name.ToLower() == lowered && p.Id != ignoreId);
     }
 
     private Task<bool> HasItemWithMultipleOptions(Guid propertyId)

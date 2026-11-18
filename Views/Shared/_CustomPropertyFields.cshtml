@@ -1,0 +1,32 @@
+@using GroupProject325.Models
+@model CustomProperty
+
+<div asp-validation-summary="ModelOnly"></div>
+
+<div class="form-row">
+    <div class="form-field">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name"></span>
+    </div>
+
+    <div class="form-field">
+        <label asp-for="ValueType">Type</label>
+        <select asp-for="ValueType" asp-items="Html.GetEnumSelectList<PropertyValueType>()"></select>
+        <span asp-validation-for="ValueType"></span>
+    </div>
+</div>
+
+<div class="form-field">
+    <label asp-for="Description"></label>
+    <textarea asp-for="Description"></textarea>
+    <span asp-validation-for="Description"></span>
+</div>
+
+<div class="form-field">
+    <label>
+        <input asp-for="AllowMultiple" />
+        Allow more than one option (List only)
+    </label>
+    <span asp-validation-for="AllowMultiple"></span>
+</div>

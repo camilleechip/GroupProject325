@@ -19,6 +19,13 @@ builder.Services.AddScoped<IAuthorizationHandler, CampaignPermissionHandler>();
 
 var app = builder.Build();
 
+// Creates ledger.db and applies any new migrations on startup, so teammates only need to pull and run.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<LedgerContext>();
+    db.Database.Migrate();
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

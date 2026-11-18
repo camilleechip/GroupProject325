@@ -12,4 +12,7 @@ public class UserInventory
     // cascades and deletes the inventory too.
     public Guid UserId { get; set; }
     public User? User { get; set; }
+
+    // The items this user is holding.
+    public List<Item> Items { get; set; } = new();
 }

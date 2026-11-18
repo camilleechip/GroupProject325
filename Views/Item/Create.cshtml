@@ -3,6 +3,7 @@
 <h2>Add New Item</h2>
 
 <form asp-action="Create" method="post">
+    <input type="hidden" asp-for="CampaignId" />
     <div class="mb-3">
         <label asp-for="Name" class="form-label"></label>
         <input asp-for="Name" class="form-control" />

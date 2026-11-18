@@ -1,0 +1,54 @@
+@model IEnumerable<GroupProject325.Models.Item>
+
+@if (!Model.Any())
+{
+    <p>No items yet.</p>
+}
+else
+{
+    <div class="cards">
+        @foreach (var item in Model)
+        {
+            <article class="card">
+                <h3><a asp-controller="Item" asp-action="Details" asp-route-id="@item.Id">@item.Name</a></h3>
+
+                @if (!string.IsNullOrWhiteSpace(item.Description))
+                {
+                    <p>@item.Description</p>
+                }
+
+                <div>
+                    <span class="card-tag">Qty @item.Quantity</span>
+                    @if (item.Value != null)
+                    {
+                        <span class="card-tag">Value @item.Value</span>
+                    }
+                    @if (item.Weight != null)
+                    {
+                        <span class="card-tag">Weight @item.Weight</span>
+                    }
+                </div>
+
+                <form asp-controller="Item" asp-action="UseUp" asp-route-id="@item.Id" method="post" class="form-row">
+                    <input type="number" name="amount" value="1" min="1" max="@item.Quantity" />
+                    <button type="submit" class="btn">Use</button>
+                </form>
+
+                @if (item.Quantity > 1)
+                {
+                    <form asp-controller="Item" asp-action="Split" asp-route-id="@item.Id" method="post" class="form-row">
+                        <input type="number" name="amount" value="1" min="1" max="@(item.Quantity - 1)" />
+                        <button type="submit" class="btn">Split</button>
+                    </form>
+                }
+
+                <div class="card-footer">
+                    <a asp-controller="Item" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                    <form asp-controller="Item" asp-action="Delete" asp-route-id="@item.Id" method="post">
+                        <button type="submit" class="btn" data-variant="danger">Delete</button>
+                    </form>
+                </div>
+            </article>
+        }
+    </div>
+}

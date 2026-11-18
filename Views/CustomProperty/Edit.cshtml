@@ -1,0 +1,17 @@
+@model GroupProject325.Models.CustomProperty
+
+@{
+    ViewData["Title"] = "Edit " + Model.Name;
+}
+
+<h2>Edit @Model.Name</h2>
+
+<form asp-controller="CustomProperty" asp-action="Edit" asp-route-id="@Model.Id" method="post" class="note-form">
+    <partial name="_CustomPropertyFields" model="Model" />
+
+    <div class="note-actions">
+        <button type="submit" class="btn">Save</button>
+    </div>
+</form>
+
+<partial name="_PropertyOptions" model="Model" />

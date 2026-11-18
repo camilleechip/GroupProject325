@@ -10,7 +10,7 @@ namespace GroupProject325.Controllers;
 
 // Items are listed on the ledger page, so there is no Index action here.
 // Every action finishes by sending the user back to the ledger.
-// The permission checks are commented out until items belong to a campaign (see docs/ERD.md).
+// The permission checks are commented out until OAuth sign-in exists (see docs/ERD.md).
 public class ItemController : Controller
 {
     private readonly LedgerContext _context;
@@ -21,26 +21,44 @@ public class ItemController : Controller
         _context = context;
         _authorization = authorization;
     }
-    
-    // GET: /Item/Create
-    public IActionResult Create()
+
+    // GET: /Item/Create?campaignId=5
+    public IActionResult Create(int campaignId)
     {
         // if (!await HasPermissionAsync(campaignId, CampaignPermission.AddItems)) return Forbid();
-        return View();
+        return View(new Item { CampaignId = campaignId });
     }
 
     // POST: /Item/Create
+    // New items start in the party pool (UserInventoryId stays null).
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Name,Description,Value,Weight,Quantity")] Item item)
+    public async Task<IActionResult> Create([Bind("Name,Description,Value,Weight,Quantity,CampaignId")] Item item)
     {
-        // if (!await HasPermissionAsync(campaignId, CampaignPermission.AddItems)) return Forbid();
-        // TODO: place the item in the party inventory once inventories exist
+        // if (!await HasPermissionAsync(item.CampaignId, CampaignPermission.AddItems)) return Forbid();
+        if (!await _context.Campaigns.AnyAsync(c => c.Id == item.CampaignId))
+        {
+            ModelState.AddModelError(nameof(item.CampaignId), "That campaign doesn't exist.");
+        }
         if (!ModelState.IsValid) return View(item);
 
         _context.Items.Add(item);
         await _context.SaveChangesAsync();
         return BackToLedger();
+    }
+
+    // GET: /Item/Details/{id}
+    public async Task<IActionResult> Details(Guid id)
+    {
+        var item = await _context.Items
+            .Include(i => i.PropertyValues)
+                .ThenInclude(v => v.CustomProperty)
+            .Include(i => i.PropertyValues)
+                .ThenInclude(v => v.PropertyOption)
+            .FirstOrDefaultAsync(i => i.Id == id);
+        if (item == null) return NotFound();
+        // if (!await HasPermissionAsync(item.CampaignId, CampaignPermission.ViewPartyInventory)) return Forbid();
+        return View(item);
     }
 
     // GET: /Item/Edit/{id}
@@ -147,6 +165,8 @@ public class ItemController : Controller
             Value = item.Value,
             Weight = item.Weight,
             Quantity = amount,
+            CampaignId = item.CampaignId,
+            UserInventoryId = item.UserInventoryId,
         };
 
         // New ItemPropertyValue rows, not the same objects: each row can only belong to one item.

@@ -1,0 +1,15 @@
+@model GroupProject325.Models.CustomProperty
+
+@{
+    ViewData["Title"] = "New Custom Property";
+}
+
+<h2>New Custom Property</h2>
+
+<form asp-controller="CustomProperty" asp-action="Create" method="post" class="note-form">
+    <partial name="_CustomPropertyFields" model="Model" />
+
+    <div class="note-actions">
+        <button type="submit" class="btn">Create Property</button>
+    </div>
+</form>

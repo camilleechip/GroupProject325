@@ -28,5 +28,12 @@ public class Item
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    public int CampaignId { get; set; }
+    public Campaign? Campaign { get; set; }
+
+    // Null means the item is in the party pool and no player holds it yet.
+    public Guid? UserInventoryId { get; set; }
+    public UserInventory? UserInventory { get; set; }
+
     public ICollection<ItemPropertyValue> PropertyValues { get; set; } = new List<ItemPropertyValue>();
 }

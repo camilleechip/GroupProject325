@@ -3,16 +3,25 @@
 This file tracks the data model and the design decisions behind it.
 Update the diagram and add a row to the decisions log whenever the model changes.
 
-## Diagram (planned, RBAC branch)
+## Diagram
 
-Only the entities involved in roles and access are shown. Item, MinorItem,
-CustomProperty, PropertyOption and ItemPropertyValue still need to be added.
+MinorItem, CustomProperty, PropertyOption and ItemPropertyValue still need to be added.
 
 ```mermaid
 erDiagram
     User ||--o{ CampaignMember : "belongs to campaigns via"
     Campaign ||--o{ CampaignMember : "has members via"
     User ||--|| UserInventory : owns
+    Campaign ||--o{ Item : has
+    UserInventory |o--o{ Item : "holds (null = party pool)"
+
+    Item {
+        Guid Id PK
+        string Name
+        int Quantity
+        int CampaignId FK
+        Guid UserInventoryId FK "nullable"
+    }
 
     User {
         Guid Id PK
@@ -60,18 +69,20 @@ erDiagram
 | 10 | 2026-11-12 | `PartyRole` renamed to `CampaignRole`; `User.PartyId` removed. | Roles now belong to a campaign, not a party. | — |
 | 11 | 2026-11-12 | Register a cookie authentication scheme with no OAuth yet. | `[Authorize]` crashed without any scheme; now it redirects to a login URL instead. | Leave it broken until the OAuth task. |
 | 12 | 2026-11-12 | Permission checks use resource-based authorization (`CampaignPermissionHandler`). GM always passes; Member passes if the campaign's `MemberPermissions` has the flag. | Permissions depend on *which* campaign, so a plain `[Authorize(Roles = ...)]` can't express them. | Role claims in the cookie. |
-| 13 | 2026-11-12 | Items get linked to a campaign through inventories, not a `CampaignId` on Item. Until then, permission checks in Item, CustomProperty and MinorItem controllers are written but commented out. | Inventories decide where an item lives, so linking now would be redone later. | Required or nullable `CampaignId` on Item. |
+| 13 | 2026-11-12 | ~~Superseded by #18.~~ Items get linked to a campaign through inventories, not a `CampaignId` on Item. Until then, permission checks in Item, CustomProperty and MinorItem controllers are written but commented out. | Inventories decide where an item lives, so linking now would be redone later. | Required or nullable `CampaignId` on Item. |
 | 14 | 2026-11-12 | Added `UseItems` (UseUp, Split) and `ManageProperties` (CustomProperty actions) flags. | Lets a GM allow using items without allowing edits. `ManageProperties` matches the existing TODOs. | Reuse `EditItems` for UseUp/Split. |
 | 15 | 2026-11-12 | MinorItem reuses the item flags: `ViewPartyInventory`, `AddItems`, `EditItems`, `DeleteItems`. *(review)* | Keeps the flag list short. | Separate flags for gold/XP. |
 | 16 | 2026-11-12 | Delete stays behind `DeleteItems` and is meant to be used rarely. Later: a transaction table logs every change to an Item or MinorItem (created, edited, used up, XP given, gold spent), so items are never truly deleted. | Keeps history for each item. | Hard delete. |
 | 17 | 2026-11-12 | The campaign creator becomes GM (written, commented out until OAuth). `CreateCampaign` clears any `Members` sent in the request. | Without clearing, anyone could post themselves in as GM. | — |
+| 18 | 2026-11-18 | Item gets a required `CampaignId` and a nullable `UserInventoryId`. Null means the item is in the party pool. Deleting an inventory sets its items back to null; deleting a campaign deletes its items. | Items can't be listed per campaign or per player without these. | Wait for inventories (#13). |
+| 19 | 2026-11-18 | Party and Campaign are the same thing. | Confirmed by Harrison in the 2026-11-11 meeting. | — |
+| 20 | 2026-11-18 | The database is built with EF Core migrations, applied automatically on startup (`Database.Migrate()` in `Program.cs`). Whoever changes a model adds a migration with `dotnet ef migrations add <Name>`. | Teammates only need to pull and run. Migrations let the schema change later without deleting `ledger.db`. | `EnsureCreated()` (can't be mixed with migrations); manual `dotnet ef database update`. |
 
 ## Open questions
 
 - What happens to `Campaign.GameMaster` (a text name) now that the GM comes from `CampaignMember`? (Left in place for now.)
-- Is "Party" the same thing as "Campaign"?
-- Who creates the first EF Core migration, so teammates don't create conflicting ones?
+- Two people adding migrations on separate branches will conflict in `LedgerContextModelSnapshot.cs`. Coordinate before adding one.
 - `MinorItem.CampaignId` is a `string`, but `Campaign.Id` is an `int`. It needs to be an `int` FK before its checks can be enabled.
-- `CustomProperty` has no campaign link yet either. Should properties be per campaign?
+- `CustomProperty` has no campaign link yet. Gage leans toward per campaign, but it's deferred for now.
 - Soft delete (e.g. `IsDeleted`) + transaction table design (decision 16).
 - No endpoint yet for a GM to change a campaign's `MemberPermissions`.

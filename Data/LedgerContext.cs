@@ -45,5 +45,12 @@ public class LedgerContext : DbContext
         // A user can only be in a campaign once.
         modelBuilder.Entity<CampaignMember>()
             .HasKey(m => new { m.UserId, m.CampaignId });
+
+        // If a user's inventory is deleted, their items go back to the party pool instead of blocking the delete.
+        modelBuilder.Entity<Item>()
+            .HasOne(i => i.UserInventory)
+            .WithMany(inv => inv.Items)
+            .HasForeignKey(i => i.UserInventoryId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
