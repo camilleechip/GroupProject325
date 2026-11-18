@@ -1,0 +1,54 @@
+@using System.Security.Claims
+@model IEnumerable<GroupProject325.Models.User>
+
+@{
+    ViewData["Title"] = "Campaign Members";
+    var mySubject = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var myProvider = User.FindFirst(ClaimTypes.NameIdentifier)?.Issuer;
+}
+
+<h1>Campaign Members</h1>
+
+<form asp-action="Index" method="get" class="inline-form">
+    <input type="text" name="searchString" placeholder="Search by name"
+        value="@Context.Request.Query["searchString"]" />
+    <button type="submit" class="button">Search</button>
+    <a asp-action="Index" class="button button-secondary">Clear</a>
+</form>
+
+@if (!Model.Any())
+{
+    <p class="muted">No users to show. You may not have joined a campaign yet, or nothing matched your search.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(m => m.UserName)</th>
+                <th>@Html.DisplayNameFor(m => m.Email)</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var isSelf = item.OAuthSubject == mySubject && item.OAuthProvider == myProvider;
+                <tr>
+                    <td>@item.UserName @(isSelf ? "(you)" : "")</td>
+                    <td>@item.Email</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        @if (isSelf)
+                        {
+                            <span> | </span>
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                            <span> | </span>
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

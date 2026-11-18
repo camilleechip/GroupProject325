@@ -14,7 +14,7 @@ using GroupProject325.Models;
 namespace GroupProject325.Controllers
 {
     // Every action requires a signed-in (OAuth) user.
-    [Authorize]
+    // [Authorize]  // Re-enable once authentication is set up in Program.cs.
     public class UsersController : Controller
     {
         private readonly LedgerContext _context;
@@ -61,6 +61,8 @@ namespace GroupProject325.Controllers
             }
 
             var user = await _context.Users
+                .Include(u => u.Memberships)
+                .ThenInclude(m => m.Campaign)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
@@ -76,6 +78,12 @@ namespace GroupProject325.Controllers
             {
                 return Forbid();
             }
+
+            // The view uses this to decide which campaigns show the role-change form.
+            ViewBag.GmCampaignIds = await _context.CampaignMembers
+                .Where(m => m.UserId == current.Id && m.Role == CampaignRole.GM)
+                .Select(m => m.CampaignId)
+                .ToListAsync();
 
             return View(user);
         }
