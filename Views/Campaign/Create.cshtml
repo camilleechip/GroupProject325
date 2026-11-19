@@ -1,0 +1,47 @@
+@model GroupProject325.Models.Campaign
+
+@{
+    ViewData["Title"] = "Create Campaign";
+}
+
+<h2>Create Campaign</h2>
+<p class="text-muted">Start a new tabletop role-playing campaign ledger.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Campaign Title *</label>
+                <input asp-for="Title" class="form-control" placeholder="e.g. Curse of Strahd" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="GameMaster" class="form-label">Game Master (GM) *</label>
+                <input asp-for="GameMaster" class="form-control" placeholder="e.g. DungeonMasterDrew" />
+                <span asp-validation-for="GameMaster" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="System" class="form-label">TTRPG System</label>
+                <input asp-for="System" class="form-control" placeholder="e.g. D&D 5e, Pathfinder 2e, System-Agnostic" />
+                <span asp-validation-for="System" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Brief summary, backstory, or house rules..."></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Campaign</button>
+            <a asp-action="Index" class="btn btn-secondary ms-2">Back to Campaigns</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
