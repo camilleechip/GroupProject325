@@ -14,7 +14,7 @@ using GroupProject325.Models;
 namespace GroupProject325.Controllers
 {
     // Every action requires a signed-in (OAuth) user.
-    // [Authorize]  // Re-enable once authentication is set up in Program.cs.
+    [Authorize]
     public class UsersController : Controller
     {
         private readonly LedgerContext _context;

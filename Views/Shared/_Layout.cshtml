@@ -146,12 +146,20 @@
 						@if (User.Identity?.IsAuthenticated == true)
 						{
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Campaign Members</a>
+								<a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Party</a>
+							</li>
+							<li class="nav-item">
+								<form asp-controller="Account" asp-action="Logout" method="post" style="display:inline; margin:0; padding:0;">
+									<button type="submit" class="nav-link text-dark">Logout</button>
+								</form>
 							</li>
 						}
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">Login</a>
-						</li>
+						else
+						{
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+							</li>
+						}
 					</ul>
 				</div>
 			</div>
