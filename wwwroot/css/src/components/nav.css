@@ -51,7 +51,7 @@
 			display: none;
 		}
 
-		li a {
+		li :is(a, button) {
 			display: inline-block;
 			align-items: center;
 			/* white-space: nowrap; */
@@ -64,6 +64,11 @@
 			box-shadow: var(--shadow-lg);
 			transition: background-color 0.2s ease;
 			font-size: var(--font-size-sm);
+			font-family: inherit;
+			border: none;
+			background: none;
+			cursor: pointer;
+			line-height: inherit;
 			max-width: 18ch;
 
 			&:hover:not([aria-current="page"]) {
@@ -92,7 +97,7 @@
 	}
 }
 
-.site-nav :is(a, li a) {
+.site-nav :is(a, li a, li button) {
 	cursor: pointer;
 }
 
