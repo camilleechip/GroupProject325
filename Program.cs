@@ -19,11 +19,11 @@ builder.Services.AddScoped<IAuthorizationHandler, CampaignPermissionHandler>();
 
 var app = builder.Build();
 
-// Ensure SQLite database and tables are created
+// Apply any pending migrations (creates the database if it doesn't exist)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<LedgerContext>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

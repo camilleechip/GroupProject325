@@ -15,6 +15,7 @@ public class LedgerContext : DbContext
     public DbSet<Campaign> Campaigns => Set<Campaign>();
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Character> Characters => Set<Character>();
     public DbSet<CampaignMember> CampaignMembers => Set<CampaignMember>();
     public DbSet<UserInventory> UserInventories => Set<UserInventory>();
     // COMMENTING THIS OUT UNTIL ENCOUNTER IS DEFINED
@@ -41,6 +42,12 @@ public class LedgerContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        modelBuilder.Entity<Character>()
+            .HasOne(c => c.User)
+            .WithMany(u => u.Characters)
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // A user can only be in a campaign once.
         modelBuilder.Entity<CampaignMember>()

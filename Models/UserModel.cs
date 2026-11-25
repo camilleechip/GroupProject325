@@ -27,6 +27,10 @@ public class User
     // The campaigns this user belongs to, and their role in each.
     public List<CampaignMember> Memberships { get; set; } = new();
 
+    // The characters this user owns. A user can have any number of them,
+    // and they are deleted together with the user.
+    public List<Character> Characters { get; set; } = new();
+
     // This user's personal inventory of items. Each user has one, and it is 
     // created and deleted together with the user. 
     // It is null only on a User object that was loaded without its inventory.
