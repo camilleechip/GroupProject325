@@ -14,15 +14,10 @@ using GroupProject325.Models;
 namespace GroupProject325.Controllers
 {
     // Every action requires a signed-in (OAuth) user.
-    // [Authorize]  // Re-enable once authentication is set up in Program.cs.
-    public class UsersController : Controller
+    [Authorize]  // Re-enable once authentication is set up in Program.cs.
+    public class UsersController : LedgerControllerBase
     {
-        private readonly LedgerContext _context;
-
-        public UsersController(LedgerContext context)
-        {
-            _context = context;
-        }
+        public UsersController(LedgerContext context) : base(context) { }
 
         // GET: Users
         // Lists users who share a campaign with the signed-in user, with an optional name search.
@@ -63,6 +58,7 @@ namespace GroupProject325.Controllers
             var user = await _context.Users
                 .Include(u => u.Memberships)
                 .ThenInclude(m => m.Campaign)
+                .Include(u => u.Characters)   // NEW: so the profile can list characters
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
@@ -300,25 +296,6 @@ namespace GroupProject325.Controllers
             return await _context.CampaignMembers.AnyAsync(m =>
                 m.UserId == otherUserId &&
                 _context.CampaignMembers.Any(c => c.UserId == userId && c.CampaignId == m.CampaignId));
-        }
-
-        // Reads the provider name and provider user ID from the signed-in OAuth identity.
-        private (string? Provider, string? Subject) GetOAuthIdentity()
-        {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            return (claim?.Issuer, claim?.Value);
-        }
-
-        // Finds the User row that matches the signed-in OAuth identity.
-        private async Task<User?> GetCurrentUserAsync()
-        {
-            var (provider, subject) = GetOAuthIdentity();
-            if (string.IsNullOrWhiteSpace(provider) || string.IsNullOrWhiteSpace(subject))
-            {
-                return null;
-            }
-            return await _context.Users.FirstOrDefaultAsync(u =>
-                u.OAuthProvider == provider && u.OAuthSubject == subject);
         }
     }
 }

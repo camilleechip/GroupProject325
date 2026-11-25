@@ -47,6 +47,30 @@
     }
 </dl>
 
+<h4>Characters</h4>
+@if (Model.Characters.Count == 0)
+{
+    <p>No characters yet.</p>
+}
+else
+{
+    <ul>
+        @foreach (var c in Model.Characters.OrderBy(c => c.Name))
+        {
+            <li>
+                <a asp-controller="Characters" asp-action="Details" asp-route-id="@c.Id">@c.Name</a>
+            </li>
+        }
+    </ul>
+}
+
+@if (isSelf)
+{
+    <p>
+        <a asp-controller="Characters" asp-action="Create" class="button">New character</a>
+    </p>
+}
+
 <p>
     @if (isSelf)
     {

@@ -358,3 +358,5 @@ MigrationBackup/
 lib/
 
 ledger.db
+ledger.db-shm
+ledger.db-wal
