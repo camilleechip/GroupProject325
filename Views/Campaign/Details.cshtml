@@ -1,0 +1,38 @@
+@model GroupProject325.Models.Campaign
+
+@{
+    ViewData["Title"] = "Campaign Details";
+}
+
+<h2>@Model.Title</h2>
+<p class="text-muted">Campaign Details</p>
+
+<div class="card p-3 mb-3">
+    <dl class="row">
+        <dt class="col-sm-3">Title</dt>
+        <dd class="col-sm-9">@Model.Title</dd>
+
+        <dt class="col-sm-3">Game Master</dt>
+        <dd class="col-sm-9">@Model.GameMaster</dd>
+
+        <dt class="col-sm-3">TTRPG System</dt>
+        <dd class="col-sm-9"><span class="badge bg-secondary">@Model.System</span></dd>
+
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description provided." : Model.Description)</dd>
+
+        <dt class="col-sm-3">Created At</dt>
+        <dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("f")</dd>
+
+        @if (Model.UpdatedAt.HasValue)
+        {
+            <dt class="col-sm-3">Last Updated</dt>
+            <dd class="col-sm-9">@Model.UpdatedAt.Value.ToLocalTime().ToString("f")</dd>
+        }
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to Campaigns</a>
+</div>

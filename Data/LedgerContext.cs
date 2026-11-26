@@ -1,4 +1,4 @@
-using GroupProject325.Models;
+﻿using GroupProject325.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GroupProject325.Data;
@@ -15,8 +15,7 @@ public class LedgerContext : DbContext
     public DbSet<Campaign> Campaigns => Set<Campaign>();
 
     public DbSet<User> Users => Set<User>();
-    // COMMENTING THIS OUT UNTIL PARTY IS DEFINED
-    // public DbSet<Party> Parties => Set<Party>();
+    public DbSet<CampaignMember> CampaignMembers => Set<CampaignMember>();
     public DbSet<UserInventory> UserInventories => Set<UserInventory>();
     public DbSet<Encounter> Encounters => Set<Encounter>();
 
@@ -59,5 +58,8 @@ public class LedgerContext : DbContext
             .WithOne()
             .HasForeignKey(e => e.CreatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
+        // A user can only be in a campaign once.
+        modelBuilder.Entity<CampaignMember>()
+            .HasKey(m => new { m.UserId, m.CampaignId });
     }
 }

@@ -138,12 +138,24 @@
 							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
 						</li>
 						<li class="nav-item">
+							<a class="nav-link text-dark" asp-area="" asp-controller="Campaign" asp-action="Index">Campaigns</a>
+						</li>
+						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Dashboard">Dashboard</a>
 						</li>
+<<<<<<< HEAD
 						@* Encounters page: list of encounters (EncounterController.Index) *@
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Encounter" asp-action="Index">Encounters</a>
 						</li>
+=======
+						@if (User.Identity?.IsAuthenticated == true)
+						{
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Campaign Members</a>
+							</li>
+						}
+>>>>>>> origin/main
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">Login</a>
 						</li>
